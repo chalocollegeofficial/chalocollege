@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
@@ -9,6 +9,7 @@ import { validateCity, validateName, validateEmail, validatePhone, handleNumeric
 const PGEnquiryModal = ({ isOpen, onClose, prefillLocation = '' }) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,29 +18,46 @@ const PGEnquiryModal = ({ isOpen, onClose, prefillLocation = '' }) => {
     preferred_location: prefillLocation,
     additional_requirements: ''
   });
+
   const [errors, setErrors] = useState({});
+
+  // ✅ When modal opens or prefill changes, update preferred_location
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(prev => ({
+        ...prev,
+        preferred_location: prefillLocation || prev.preferred_location || ''
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, prefillLocation]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name === 'contact_number') {
-        const val = handleNumericInput(e, 10);
-        if (val !== undefined) setFormData(prev => ({ ...prev, [name]: val }));
-        return;
+      const val = handleNumericInput(e, 10);
+      if (val !== undefined) {
+        setFormData(prev => ({ ...prev, [name]: val }));
+        if (errors.contact_number) setErrors(prev => ({ ...prev, contact_number: '' }));
+      }
+      return;
     }
 
     setFormData(prev => ({ ...prev, [name]: value }));
-    
+
     // Inline validation
     if (name === 'preferred_location') {
-        setErrors(prev => ({...prev, preferred_location: !validateCity(value) ? 'City must be alphabets only' : ''}));
+      setErrors(prev => ({
+        ...prev,
+        preferred_location: value && !validateCity(value) ? 'City must be alphabets only' : ''
+      }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Strict validation before submit
+
     const newErrors = {};
     if (!validateName(formData.name)) newErrors.name = "Invalid name";
     if (!validateEmail(formData.email)) newErrors.email = "Invalid email";
@@ -47,17 +65,14 @@ const PGEnquiryModal = ({ isOpen, onClose, prefillLocation = '' }) => {
     if (formData.preferred_location && !validateCity(formData.preferred_location)) newErrors.preferred_location = "Invalid city";
 
     if (Object.keys(newErrors).length > 0) {
-        setErrors(newErrors);
-        return;
+      setErrors(newErrors);
+      return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
-        .from('pg_enquiries')
-        .insert([formData]);
-
+      const { error } = await supabase.from('pg_enquiries').insert([formData]);
       if (error) throw error;
 
       toast({
@@ -65,7 +80,7 @@ const PGEnquiryModal = ({ isOpen, onClose, prefillLocation = '' }) => {
         description: "We'll help you find the perfect PG soon.",
         variant: "default",
       });
-      
+
       setFormData({
         name: '',
         email: '',
@@ -76,7 +91,6 @@ const PGEnquiryModal = ({ isOpen, onClose, prefillLocation = '' }) => {
       });
       setErrors({});
       onClose();
-
     } catch (error) {
       console.error('Error submitting PG enquiry:', error);
       toast({
@@ -90,17 +104,23 @@ const PGEnquiryModal = ({ isOpen, onClose, prefillLocation = '' }) => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      {/* ✅ Added explicit bg + text classes (safe even if theme vars change later) */}
+      <DialogContent className="sm:max-w-[520px] bg-white text-gray-900 border border-gray-200 shadow-2xl">
         <DialogHeader>
-          <DialogTitle>Find Your Perfect PG</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-gray-900">Find Your Perfect PG</DialogTitle>
+          <DialogDescription className="text-gray-600">
             Fill in your details and preferences to get the best PG options.
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Name *</label>
               <input
@@ -108,11 +128,14 @@ const PGEnquiryModal = ({ isOpen, onClose, prefillLocation = '' }) => {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${errors.name ? 'border-red-500' : 'border-input'}`}
+                className={`flex h-10 w-full rounded-md border bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 ${
+                  errors.name ? 'border-red-500' : 'border-gray-300'
+                }`}
                 placeholder="Your Name"
               />
               {errors.name && <span className="text-xs text-red-500">{errors.name}</span>}
             </div>
+
             <div className="space-y-2">
               <label className="text-sm font-medium">Contact Number *</label>
               <input
@@ -121,7 +144,9 @@ const PGEnquiryModal = ({ isOpen, onClose, prefillLocation = '' }) => {
                 value={formData.contact_number}
                 onChange={handleChange}
                 maxLength={10}
-                className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${errors.contact_number ? 'border-red-500' : 'border-input'}`}
+                className={`flex h-10 w-full rounded-md border bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 ${
+                  errors.contact_number ? 'border-red-500' : 'border-gray-300'
+                }`}
                 placeholder="Mobile Number"
               />
               {errors.contact_number && <span className="text-xs text-red-500">{errors.contact_number}</span>}
@@ -136,33 +161,40 @@ const PGEnquiryModal = ({ isOpen, onClose, prefillLocation = '' }) => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${errors.email ? 'border-red-500' : 'border-input'}`}
+              className={`flex h-10 w-full rounded-md border bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 ${
+                errors.email ? 'border-red-500' : 'border-gray-300'
+              }`}
               placeholder="your@email.com"
             />
-             {errors.email && <span className="text-xs text-red-500">{errors.email}</span>}
+            {errors.email && <span className="text-xs text-red-500">{errors.email}</span>}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Budget (Monthly)</label>
               <input
                 name="budget"
                 value={formData.budget}
                 onChange={handleChange}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
                 placeholder="e.g. 5000-8000"
               />
             </div>
+
             <div className="space-y-2">
               <label className="text-sm font-medium">Preferred Location</label>
               <input
                 name="preferred_location"
                 value={formData.preferred_location}
                 onChange={handleChange}
-                className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${errors.preferred_location ? 'border-red-500' : 'border-input'}`}
+                className={`flex h-10 w-full rounded-md border bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 ${
+                  errors.preferred_location ? 'border-red-500' : 'border-gray-300'
+                }`}
                 placeholder="City or Area"
               />
-              {errors.preferred_location && <span className="text-xs text-red-500">{errors.preferred_location}</span>}
+              {errors.preferred_location && (
+                <span className="text-xs text-red-500">{errors.preferred_location}</span>
+              )}
             </div>
           </div>
 
@@ -172,7 +204,7 @@ const PGEnquiryModal = ({ isOpen, onClose, prefillLocation = '' }) => {
               name="additional_requirements"
               value={formData.additional_requirements}
               onChange={handleChange}
-              className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="flex min-h-[90px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
               placeholder="Any specific needs? (e.g., AC, Single Room, Food included)"
             />
           </div>

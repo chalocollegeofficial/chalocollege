@@ -1,49 +1,21 @@
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/components/ui/use-toast';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Helmet } from 'react-helmet';
 import { supabase } from '@/lib/customSupabaseClient';
-import { Edit, Home, PlayCircle, Plus, Trash2, Upload, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useToast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button';
+import ImageGallery from '@/components/common/ImageGallery';
+import PGEnquiryModal from '@/components/PGEnquiryModal';
+import { Loader2, Search, MapPin, Home, Phone, PlayCircle, BedDouble, IndianRupee } from 'lucide-react';
 
-const AdminPGListings = () => {
+const PGListingsPage = () => {
   const { toast } = useToast();
 
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
 
-  const [formData, setFormData] = useState({
-    id: null,
-    pg_name: '',
-    location: '',
-    room_type: 'Single/Double',
-    rent_range: '',
-    facilities: '',
-    contact_number: '',
-    images: [],
-    video_url: ''
-  });
-
-  // ✅ lock body scroll when dialog is open
-  useEffect(() => {
-    if (isDialogOpen) {
-      const original = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = original || '';
-      };
-    }
-  }, [isDialogOpen]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showEnquiry, setShowEnquiry] = useState(false);
+  const [prefillLocation, setPrefillLocation] = useState('');
 
   useEffect(() => {
     fetchListings();
@@ -61,260 +33,224 @@ const AdminPGListings = () => {
       setListings(data || []);
     } catch (error) {
       console.error(error);
-      toast({ title: 'Error', description: 'Failed to fetch listings', variant: 'destructive' });
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch PG listings',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      id: null,
-      pg_name: '',
-      location: '',
-      room_type: 'Single/Double',
-      rent_range: '',
-      facilities: '',
-      contact_number: '',
-      images: [],
-      video_url: ''
+  const filtered = useMemo(() => {
+    const q = (searchTerm || '').trim().toLowerCase();
+    if (!q) return listings;
+
+    return (listings || []).filter((pg) => {
+      const name = (pg.pg_name || '').toLowerCase();
+      const loc = (pg.location || '').toLowerCase();
+      return name.includes(q) || loc.includes(q);
     });
+  }, [listings, searchTerm]);
+
+  const openEnquiry = (location) => {
+    setPrefillLocation(location || '');
+    setShowEnquiry(true);
   };
 
-  const handleImageUpload = async (e) => {
-    try {
-      setUploadingImage(true);
-      const files = Array.from(e.target.files || []);
-      e.target.value = ''; // reset
-
-      if (files.length === 0) return;
-
-      if (formData.images.length + files.length > 5) {
-        toast({ variant: "destructive", title: "Limit reached", description: "Max 5 images allowed." });
-        return;
-      }
-
-      const uploadPromises = files.map(async (file) => {
-        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-          throw new Error("Invalid format. Use JPG, PNG, or WebP.");
-        }
-        if (file.size > 5 * 1024 * 1024) {
-          throw new Error("Max file size 5MB.");
-        }
-
-        const fileExt = file.name.split('.').pop();
-        const safeName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
-        const filePath = `pg-images/${safeName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('images')
-          .upload(filePath, file);
-
-        if (uploadError) throw uploadError;
-
-        const { data: pub } = supabase.storage
-          .from('images')
-          .getPublicUrl(filePath);
-
-        return pub?.publicUrl;
-      });
-
-      const uploadedUrls = (await Promise.all(uploadPromises)).filter(Boolean);
-      setFormData(prev => ({ ...prev, images: [...prev.images, ...uploadedUrls] }));
-
-      toast({ title: 'Success', description: 'Images uploaded successfully' });
-    } catch (error) {
-      console.error(error);
-      toast({ title: 'Error', description: error.message || 'Failed to upload', variant: 'destructive' });
-    } finally {
-      setUploadingImage(false);
+  const parseFacilities = (fac) => {
+    if (!fac) return [];
+    if (Array.isArray(fac)) return fac.filter(Boolean);
+    if (typeof fac === 'string') {
+      return fac.split(',').map((s) => s.trim()).filter(Boolean);
     }
-  };
-
-  const removeImage = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index)
-    }));
-  };
-
-  const openEdit = (pg) => {
-    let parsedImages = [];
-    try {
-      if (Array.isArray(pg.images)) parsedImages = pg.images;
-      else if (typeof pg.images === 'string' && pg.images.trim() !== '') parsedImages = JSON.parse(pg.images);
-    } catch (e) {
-      parsedImages = [];
-    }
-
-    setFormData({
-      id: pg.id,
-      pg_name: pg.pg_name || '',
-      location: pg.location || '',
-      room_type: pg.room_type || 'Single/Double',
-      rent_range: pg.rent_range || '',
-      contact_number: pg.contact_number || '',
-      images: parsedImages,
-      facilities: Array.isArray(pg.facilities) ? pg.facilities.join(', ') : (pg.facilities || ''),
-      video_url: pg.video_url || ''
-    });
-
-    setIsDialogOpen(true);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const facilitiesArray = formData.facilities
-        ? formData.facilities.split(',').map(f => f.trim()).filter(Boolean)
-        : [];
-
-      const payload = {
-        pg_name: formData.pg_name,
-        location: formData.location,
-        room_type: formData.room_type,
-        rent_range: formData.rent_range,
-        contact_number: formData.contact_number,
-        images: JSON.stringify(formData.images),
-        facilities: facilitiesArray,
-        video_url: formData.video_url
-      };
-
-      if (formData.id) {
-        const { error } = await supabase
-          .from('pg_listings')
-          .update(payload)
-          .eq('id', formData.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('pg_listings')
-          .insert([payload]);
-        if (error) throw error;
-      }
-
-      toast({ title: 'Success', description: 'PG listing saved successfully' });
-
-      await fetchListings();
-      setIsDialogOpen(false);
-      resetForm();
-    } catch (error) {
-      console.error(error);
-      toast({ title: 'Error', description: error.message || 'Failed to save', variant: 'destructive' });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this listing?')) return;
-
-    try {
-      const { error } = await supabase.from('pg_listings').delete().eq('id', id);
-      if (error) throw error;
-
-      toast({ title: 'Success', description: 'Listing deleted' });
-      setListings(prev => prev.filter(pg => pg.id !== id));
-    } catch (error) {
-      console.error(error);
-      toast({ title: 'Error', description: 'Failed to delete', variant: 'destructive' });
-    }
+    return [];
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Manage PG Listings</h1>
+    <>
+      <Helmet>
+        <title>Get PG - Aao College</title>
+        <meta
+          name="description"
+          content="Find PG/Hostel options with rent, room type, facilities, and send enquiry to get best PG suggestions."
+        />
+      </Helmet>
 
-        <Dialog
-          open={isDialogOpen}
-          onOpenChange={(open) => {
-            setIsDialogOpen(open);
-            if (!open) resetForm();
-          }}
-        
-        >
+      {/* Enquiry Modal */}
+      <PGEnquiryModal
+        isOpen={showEnquiry}
+        onClose={() => setShowEnquiry(false)}
+        prefillLocation={prefillLocation}
+      />
 
-          </Dialog>
-      </div>
+      <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
+        {/* Header */}
+        <section className="py-8 bg-white shadow-sm sticky top-16 z-40">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                Find Your <span className="text-blue-600">PG</span>
+              </h1>
 
-      <div className="bg-white rounded-lg border shadow-sm overflow-hidden mt-6">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-gray-50 border-b">
-            <tr>
-              <th className="px-6 py-3 font-medium text-gray-500">Image</th>
-              <th className="px-6 py-3 font-medium text-gray-500">PG Name</th>
-              <th className="px-6 py-3 font-medium text-gray-500">Location</th>
-              <th className="px-6 py-3 font-medium text-gray-500">Rent</th>
-              <th className="px-6 py-3 font-medium text-gray-500">Actions</th>
-            </tr>
-          </thead>
+              <div className="relative max-w-md w-full">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  className="w-full pl-10 pr-4 py-2 border rounded-full bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                  placeholder="Search by PG name or location..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
 
-          <tbody className="divide-y divide-gray-100">
+              <Button
+                onClick={() => openEnquiry('')}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Send Enquiry
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Content */}
+        <section className="py-8">
+          <div className="container mx-auto px-4">
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-gray-600 text-sm">
+                {loading ? 'Loading...' : `Showing ${filtered.length} results`}
+              </p>
+            </div>
+
             {loading ? (
-              <tr>
-                <td colSpan="5" className="px-6 py-4 text-center">Loading...</td>
-              </tr>
-            ) : listings.length === 0 ? (
-              <tr>
-                <td colSpan="5" className="px-6 py-4 text-center text-gray-500">No listings found</td>
-              </tr>
+              <div className="flex justify-center items-center py-20">
+                <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="text-center py-20 bg-white rounded-xl shadow border border-dashed border-gray-300">
+                <h3 className="text-xl font-medium text-gray-900">No PG found</h3>
+                <p className="text-gray-500 mt-2">Try searching with a different name or location.</p>
+                <Button variant="link" className="text-blue-600 mt-2" onClick={() => setSearchTerm('')}>
+                  Clear search
+                </Button>
+              </div>
             ) : (
-              listings.map((pg) => {
-                let firstImage = null;
-                try {
-                  if (typeof pg.images === 'string' && pg.images.trim() !== '') {
-                    const arr = JSON.parse(pg.images);
-                    firstImage = arr?.[0] || null;
-                  }
-                } catch (e) {}
-
-                return (
-                  <tr key={pg.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      {firstImage ? (
-                        <img src={firstImage} alt="" className="h-10 w-10 rounded object-cover" />
-                      ) : (
-                        <div className="h-10 w-10 rounded bg-gray-100 flex items-center justify-center">
-                          <Home className="h-5 w-5 text-gray-400" />
+              <div className="grid gap-6">
+                {filtered.map((pg) => {
+                  const facilities = parseFacilities(pg.facilities);
+                  return (
+                    <div
+                      key={pg.id}
+                      className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all hover:-translate-y-1"
+                    >
+                      <div className="grid md:grid-cols-3 gap-6">
+                        {/* Image */}
+                        <div className="md:col-span-1">
+                          <ImageGallery
+                            images={pg.images}
+                            alt={pg.pg_name || 'PG'}
+                            className="h-full min-h-[220px]"
+                          />
                         </div>
-                      )}
-                    </td>
 
-                    <td className="px-6 py-4 font-medium text-gray-900">{pg.pg_name}</td>
-                    <td className="px-6 py-4 text-gray-500">{pg.location}</td>
-                    <td className="px-6 py-4 text-gray-500">{pg.rent_range}</td>
+                        {/* Details */}
+                        <div className="md:col-span-2 p-6">
+                          <div className="flex items-start justify-between mb-3">
+                            <div>
+                              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                                {pg.pg_name || 'PG'}
+                              </h3>
 
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => openEdit(pg)}
-                          className="p-1.5 hover:bg-blue-50 rounded text-blue-600"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
+                              <div className="flex items-center text-gray-600">
+                                <MapPin className="h-4 w-4 mr-2" />
+                                <span>{pg.location || 'N/A'}</span>
+                              </div>
+                            </div>
 
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(pg.id)}
-                          className="p-1.5 hover:bg-red-50 rounded text-red-600"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                            <div className="hidden sm:flex items-center bg-blue-50 px-3 py-1 rounded-lg text-blue-700">
+                              <Home className="h-4 w-4 mr-1" />
+                              <span className="text-sm font-semibold">PG</span>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                            <div className="flex items-center text-gray-600">
+                              <BedDouble className="h-4 w-4 mr-2 text-purple-600" />
+                              <div>
+                                <p className="text-xs text-gray-500">Room Type</p>
+                                <p className="font-semibold text-gray-900">{pg.room_type || 'N/A'}</p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center text-gray-600">
+                              <IndianRupee className="h-4 w-4 mr-2 text-green-600" />
+                              <div>
+                                <p className="text-xs text-gray-500">Rent</p>
+                                <p className="font-semibold text-gray-900">{pg.rent_range || 'N/A'}</p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center text-gray-600">
+                              <Phone className="h-4 w-4 mr-2 text-blue-600" />
+                              <div>
+                                <p className="text-xs text-gray-500">Contact</p>
+                                <p className="font-semibold text-gray-900">{pg.contact_number || 'N/A'}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {facilities.length > 0 && (
+                            <div className="mb-4">
+                              <p className="text-sm text-gray-500 mb-2">Facilities:</p>
+                              <div className="flex flex-wrap gap-2">
+                                {facilities.slice(0, 8).map((f, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="bg-gray-100 text-gray-700 px-3 py-1 rounded-lg text-sm font-medium"
+                                  >
+                                    {f}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="flex flex-wrap gap-3 items-center">
+                            <Button
+                              onClick={() => openEnquiry(pg.location)}
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              Send Enquiry
+                            </Button>
+
+                            {pg.video_url && (
+                              <a
+                                href={pg.video_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center h-10 px-4 rounded-md border border-red-200 bg-white text-red-600 hover:bg-red-50 hover:text-red-700 font-medium transition-colors text-sm"
+                                title="Watch Video"
+                              >
+                                <PlayCircle className="h-4 w-4 mr-2" />
+                                Video Tour
+                              </a>
+                            )}
+                          </div>
+
+                          {/* ✅ IMPORTANT: No Edit/Delete buttons on public page */}
+                        </div>
                       </div>
-                    </td>
-                  </tr>
-                );
-              })
+                    </div>
+                  );
+                })}
+              </div>
             )}
-          </tbody>
-        </table>
+          </div>
+        </section>
       </div>
-    </div>
+    </>
   );
 };
 
-export default AdminPGListings;
+export default PGListingsPage;
