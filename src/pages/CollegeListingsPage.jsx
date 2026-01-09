@@ -15,7 +15,6 @@ const CollegeListingsPage = () => {
 
   const location = useLocation();
 
-  // Price filter removed from state
   const [filters, setFilters] = useState({
     state: '',
     course: '',
@@ -67,9 +66,7 @@ const CollegeListingsPage = () => {
     if (!coursesData) return [];
     if (Array.isArray(coursesData)) return coursesData;
     if (typeof coursesData === 'string') {
-      if (coursesData.includes(',')) {
-        return coursesData.split(',').map((c) => c.trim());
-      }
+      if (coursesData.includes(',')) return coursesData.split(',').map((c) => c.trim());
       return [coursesData];
     }
     return [];
@@ -84,25 +81,22 @@ const CollegeListingsPage = () => {
 
     if (filters.state) {
       const filterState = filters.state.toLowerCase();
-      const locationString = `${college.state || ''} ${
-        college.city || ''
-      }`.toLowerCase();
+      const locationString = `${college.state || ''} ${college.city || ''}`.toLowerCase();
       if (!locationString.includes(filterState)) return false;
     }
 
     if (filters.course) {
       const filterCourse = filters.course.toLowerCase();
       const courses = getCoursesArray(college.courses_offered);
-      const hasCourse = courses.some((c) =>
-        c.toLowerCase().includes(filterCourse)
-      );
+      const hasCourse = courses.some((c) => c.toLowerCase().includes(filterCourse));
       if (!hasCourse) return false;
     }
 
+    // ✅ category filter
     if (filters.category) {
       const filterCat = filters.category.toLowerCase();
-      const affiliation = (college.affiliation || '').toLowerCase();
-      if (!affiliation.includes(filterCat)) return false;
+      const category = (college.category || '').toLowerCase();
+      if (!category.includes(filterCat)) return false;
     }
 
     return true;
@@ -112,10 +106,7 @@ const CollegeListingsPage = () => {
     <>
       <Helmet>
         <title>College Listings - Aao College</title>
-        <meta
-          name="description"
-          content="Browse and compare top colleges. Filter by course, state and more."
-        />
+        <meta name="description" content="Browse and compare top colleges. Filter by course, state and more." />
       </Helmet>
 
       <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
@@ -127,11 +118,7 @@ const CollegeListingsPage = () => {
               </h1>
 
               <div className="md:hidden">
-                <Button
-                  onClick={() => setShowFilters(!showFilters)}
-                  variant="outline"
-                  className="w-full"
-                >
+                <Button onClick={() => setShowFilters(!showFilters)} variant="outline" className="w-full">
                   <Filter className="h-4 w-4 mr-2" /> Filters
                 </Button>
               </div>
@@ -142,9 +129,7 @@ const CollegeListingsPage = () => {
                   className="w-full pl-10 pr-4 py-2 border rounded-full bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all"
                   placeholder="Search by college name..."
                   value={filters.collegeName}
-                  onChange={(e) =>
-                    handleFilterChange({ collegeName: e.target.value })
-                  }
+                  onChange={(e) => handleFilterChange({ collegeName: e.target.value })}
                 />
               </div>
             </div>
@@ -154,11 +139,7 @@ const CollegeListingsPage = () => {
         <section className="py-8">
           <div className="container mx-auto px-4">
             <div className="flex flex-col lg:flex-row gap-8">
-              <div
-                className={`lg:w-80 flex-shrink-0 ${
-                  showFilters ? 'block' : 'hidden lg:block'
-                }`}
-              >
+              <div className={`lg:w-80 flex-shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
                 <div className="lg:sticky lg:top-28 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto">
                   <FilterSidebar
                     show={showFilters}
@@ -172,9 +153,7 @@ const CollegeListingsPage = () => {
               <div className="flex-1">
                 <div className="mb-4 flex items-center justify-between">
                   <p className="text-gray-600 text-sm">
-                    {loading
-                      ? 'Loading...'
-                      : `Showing ${filteredColleges.length} results`}
+                    {loading ? 'Loading...' : `Showing ${filteredColleges.length} results`}
                   </p>
                 </div>
 
@@ -197,22 +176,11 @@ const CollegeListingsPage = () => {
                   </div>
                 ) : (
                   <div className="text-center py-20 bg-white rounded-xl shadow border border-dashed border-gray-300">
-                    <h3 className="text-xl font-medium text-gray-900">
-                      No colleges found
-                    </h3>
-                    <p className="text-gray-500 mt-2">
-                      Try adjusting your filters.
-                    </p>
+                    <h3 className="text-xl font-medium text-gray-900">No colleges found</h3>
+                    <p className="text-gray-500 mt-2">Try adjusting your filters.</p>
                     <Button
                       variant="link"
-                      onClick={() =>
-                        setFilters({
-                          state: '',
-                          course: '',
-                          collegeName: '',
-                          category: '',
-                        })
-                      }
+                      onClick={() => setFilters({ state: '', course: '', collegeName: '', category: '' })}
                       className="text-blue-600 mt-2"
                     >
                       Clear all filters

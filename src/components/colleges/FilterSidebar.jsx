@@ -4,35 +4,32 @@ import { Button } from '@/components/ui/button';
 
 const FilterSidebar = ({ show, onClose, onFilterChange, filters }) => {
   const states = [
-    'Delhi', 'Uttar Pradesh', 'Maharashtra', 'Karnataka', 'Tamil Nadu', 
+    'Delhi', 'Uttar Pradesh', 'Maharashtra', 'Karnataka', 'Tamil Nadu',
     'Telangana', 'West Bengal', 'Rajasthan', 'Punjab', 'Haryana', 'Madhya Pradesh'
   ];
 
   const courses = [
-    'B.Tech', 'MBA', 'BBA', 'BCA', 'M.Tech', 'MBBS', 
+    'B.Tech', 'MBA', 'BBA', 'BCA', 'M.Tech', 'MBBS',
     'B.Com', 'BA', 'B.Sc', 'LLB', 'Pharmacy'
   ];
 
-  const categories = ['Private', 'Government', 'Deemed', 'Autonomous'];
+  const categories = ['Government', 'Semi-Government', 'Private'];
 
   const handleChange = (key, value) => {
     onFilterChange({ [key]: value });
   };
 
   const handleClear = () => {
-    const reset = {
+    onFilterChange({
       state: '',
       course: '',
       collegeName: '',
       category: '',
-    };
-    onFilterChange(reset);
+    });
   };
 
   const handleApply = () => {
-    if (window.innerWidth < 768) {
-      onClose();
-    }
+    if (window.innerWidth < 768) onClose();
   };
 
   return (
@@ -56,22 +53,17 @@ const FilterSidebar = ({ show, onClose, onFilterChange, filters }) => {
         <div className="p-6 h-full overflow-y-auto md:h-auto">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900">Filters</h2>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg md:hidden"
-            >
+
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg md:hidden">
               <X className="h-5 w-5" />
             </button>
-            <button
-              onClick={handleClear}
-              className="text-sm text-red-500 hover:underline hidden md:block"
-            >
+
+            <button onClick={handleClear} className="text-sm text-red-500 hover:underline hidden md:block">
               Clear All
             </button>
           </div>
 
           <div className="space-y-6">
-            {/* Search Filter */}
             <div>
               <h3 className="font-semibold text-gray-900 mb-3">Search Name</h3>
               <input
@@ -83,7 +75,6 @@ const FilterSidebar = ({ show, onClose, onFilterChange, filters }) => {
               />
             </div>
 
-            {/* Location Filter */}
             <div>
               <h3 className="font-semibold text-gray-900 mb-3">Location (State)</h3>
               <select
@@ -98,7 +89,6 @@ const FilterSidebar = ({ show, onClose, onFilterChange, filters }) => {
               </select>
             </div>
 
-            {/* Course Filter */}
             <div>
               <h3 className="font-semibold text-gray-900 mb-3">Course</h3>
               <select
@@ -113,7 +103,7 @@ const FilterSidebar = ({ show, onClose, onFilterChange, filters }) => {
               </select>
             </div>
 
-            {/* Category Filter */}
+            {/* ✅ Category filter */}
             <div>
               <h3 className="font-semibold text-gray-900 mb-3">Category</h3>
               <select
@@ -128,12 +118,10 @@ const FilterSidebar = ({ show, onClose, onFilterChange, filters }) => {
               </select>
             </div>
 
-            <Button
-              onClick={handleApply}
-              className="w-full bg-blue-600 hover:bg-blue-700 mt-4 md:hidden"
-            >
+            <Button onClick={handleApply} className="w-full bg-blue-600 hover:bg-blue-700 mt-4 md:hidden">
               Show Results
             </Button>
+
             <Button
               onClick={handleClear}
               variant="outline"

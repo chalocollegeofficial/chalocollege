@@ -30,6 +30,7 @@ const AdminColleges = () => {
     college_name: '',
     city: '',
     state: '',
+    category: '',
     fee_range: '',
     ranking: '',
     affiliation: '',
@@ -72,10 +73,10 @@ const AdminColleges = () => {
         .select('*')
         .order('college_name');
 
-      // ✅ Search by name/city/state/affiliation
+      // ✅ Search by name/city/state/affiliation/category
       if (q) {
         query = query.or(
-          `college_name.ilike.%${q}%,city.ilike.%${q}%,state.ilike.%${q}%,affiliation.ilike.%${q}%`
+          `college_name.ilike.%${q}%,city.ilike.%${q}%,state.ilike.%${q}%,affiliation.ilike.%${q}%,category.ilike.%${q}%`
         );
       }
 
@@ -228,13 +229,14 @@ const AdminColleges = () => {
         college_name: formData.college_name,
         city: formData.city,
         state: formData.state,
+        category: formData.category,
         fee_range: formData.fee_range,
         ranking: formData.ranking,
         affiliation: formData.affiliation,
 
         // ✅ NEW
         brief_description: formData.brief_description,
-        description: formData.description, // ✅ Rich HTML
+        description: formData.description,
 
         video_url: formData.video_url,
         brochure_url: formData.brochure_url,
@@ -246,7 +248,6 @@ const AdminColleges = () => {
             : formData.facilities)
           : [],
 
-        // ✅ NEW
         courses: cleanedCourses,
 
         // images stored as TEXT in DB
@@ -295,7 +296,6 @@ const AdminColleges = () => {
   };
 
   const handleEdit = (college) => {
-    // Parse images
     let parsedImages = [];
     if (Array.isArray(college.images)) {
       parsedImages = college.images;
@@ -308,7 +308,6 @@ const AdminColleges = () => {
       }
     }
 
-    // Placements -> string
     let placementsString = '';
     if (college.placements) {
       placementsString = typeof college.placements === 'string'
@@ -316,7 +315,6 @@ const AdminColleges = () => {
         : JSON.stringify(college.placements, null, 2);
     }
 
-    // Courses -> ensure array
     let courses = [];
     if (Array.isArray(college.courses)) {
       courses = college.courses;
@@ -334,13 +332,13 @@ const AdminColleges = () => {
       college_name: college.college_name || '',
       city: college.city || '',
       state: college.state || '',
+      category: college.category || '',
       fee_range: college.fee_range || '',
       ranking: college.ranking || '',
       affiliation: college.affiliation || '',
 
-      // ✅ NEW
       brief_description: college.brief_description || '',
-      description: college.description || '', // rich html
+      description: college.description || '',
 
       images: parsedImages,
       video_url: college.video_url || '',
@@ -463,14 +461,40 @@ const AdminColleges = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-1">Fee Range</label>
-                    <input required className="w-full p-2 border rounded" value={formData.fee_range} onChange={e => setFormData({ ...formData, fee_range: e.target.value })} />
+                    <input
+                      required
+                      className="w-full p-2 border rounded"
+                      value={formData.fee_range}
+                      onChange={e => setFormData({ ...formData, fee_range: e.target.value })}
+                    />
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium mb-1">Ranking</label>
-                    <input required className="w-full p-2 border rounded" value={formData.ranking} onChange={e => setFormData({ ...formData, ranking: e.target.value })} />
+                    <input
+                      required
+                      className="w-full p-2 border rounded"
+                      value={formData.ranking}
+                      onChange={e => setFormData({ ...formData, ranking: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Category</label>
+                    <select
+                      required
+                      className="w-full p-2 border rounded bg-white"
+                      value={formData.category}
+                      onChange={e => setFormData({ ...formData, category: e.target.value })}
+                    >
+                      <option value="">Select category</option>
+                      <option value="Government">Government</option>
+                      <option value="Semi-Government">Semi-Government</option>
+                      <option value="Private">Private</option>
+                    </select>
                   </div>
                 </div>
 
@@ -498,7 +522,6 @@ const AdminColleges = () => {
                   {formData.brochure_url && <p className="text-xs text-green-600 mt-1">Brochure uploaded!</p>}
                 </div>
 
-                {/* ✅ Brief Description */}
                 <div>
                   <label className="block text-sm font-medium mb-1">Brief Description (1–2 lines)</label>
                   <textarea
@@ -510,7 +533,6 @@ const AdminColleges = () => {
                   />
                 </div>
 
-                {/* ✅ Rich Description */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Full Description (Rich Text)</label>
                   <RichTextEditor
@@ -520,7 +542,6 @@ const AdminColleges = () => {
                   />
                 </div>
 
-                {/* ✅ Courses with Fee */}
                 <div className="border p-4 rounded bg-gray-50 space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold text-gray-700">Courses with Fee</h3>
@@ -602,7 +623,6 @@ const AdminColleges = () => {
           </Dialog>
         </div>
 
-        {/* ✅ Search Bar */}
         <div className="flex items-center gap-3">
           <input
             value={searchTerm}
@@ -638,6 +658,7 @@ const AdminColleges = () => {
                     {college.brief_description && (
                       <p className="text-xs text-gray-500 mt-1 line-clamp-2">{college.brief_description}</p>
                     )}
+                    {college.category && <p className="text-xs text-gray-400 mt-1">Category: {college.category}</p>}
                     {college.affiliation && <p className="text-xs text-gray-400 mt-1">Affiliation: {college.affiliation}</p>}
                     {college.video_url && (
                       <span className="text-xs text-blue-600 flex items-center mt-1">

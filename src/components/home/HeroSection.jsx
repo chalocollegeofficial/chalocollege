@@ -133,11 +133,11 @@ const HeroSection = () => {
             <img alt="Students celebrating college admission" className="rounded-2xl shadow-2xl" src="https://images.unsplash.com/photo-1634129536400-5c3cdd3ef953" />
             <div className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-xl p-4 hidden md:block">
               <div className="flex items-center space-x-3">
-                <div className="bg-blue-100 p-3 rounded-lg">
+                <div className="bg-blue-100 rounded-lg">
                   <img 
                     src="/logo.png" 
                     alt="Aao College Logo small icon" 
-                    className="h-6 w-6 object-contain" 
+                    className="h-14 w-14 object-contain" 
                   />
                 </div>
                 <div>
