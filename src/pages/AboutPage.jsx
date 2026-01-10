@@ -57,7 +57,7 @@ const AboutPage = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
-                <img alt="About Chalo College team" className="rounded-2xl shadow-xl" src="https://images.unsplash.com/photo-1562942668-ccd9a1f2ffc6" />
+                <img alt="About Aao College team" className="rounded-2xl shadow-xl" src="https://images.unsplash.com/photo-1562942668-ccd9a1f2ffc6" />
               </motion.div>
 
               <motion.div
@@ -67,7 +67,7 @@ const AboutPage = () => {
               >
                 <h2 className="text-3xl font-bold text-gray-900 mb-4">Who We Are</h2>
                 <p className="text-gray-600 mb-4">
-                  <span className="text-blue-600">Chalo</span><span className="text-green-600">College</span> is India's leading college admission guidance platform, dedicated to helping students navigate the complex world of higher education. Founded by education experts and former admission counselors, we understand the challenges students face in choosing the right college and course.
+                  <span className="text-blue-600">Aao</span><span className="text-green-600">College</span> is India's leading college admission guidance platform, dedicated to helping students navigate the complex world of higher education. Founded by education experts and former admission counselors, we understand the challenges students face in choosing the right college and course.
                 </p>
                 <p className="text-gray-600 mb-4">
                   Our platform combines cutting-edge technology with personalized human guidance to provide comprehensive support throughout your college admission journey. From college selection to final enrollment, we're with you every step of the way.
@@ -120,7 +120,7 @@ const AboutPage = () => {
               className="mb-16"
             >
               <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
-                Why Choose <span className="text-blue-600">Chalo</span><span className="text-green-600">College</span>?
+                Why Choose <span className="text-blue-600">Aao</span><span className="text-green-600">College</span>?
               </h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {whyChooseUs.map((item, index) => (
