@@ -39,7 +39,7 @@ const AdminBlogs = () => {
   const [editingId, setEditingId] = useState(null);
 
   // ✅ Categories dropdown list (includes "College Compare")
-  const blogCategories = ['Admissions', 'Exams', 'Career', 'Student Life', 'Tips', 'College Compare'];
+  const blogCategories = ['Admissions', 'Exams', 'Career', 'Student Life', 'Tips', 'Compare & Decide'];
 
   useEffect(() => {
     fetchPosts();

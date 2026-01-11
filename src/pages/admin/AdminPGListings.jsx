@@ -1,10 +1,11 @@
+/* FULL FILE (large) */
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/customSupabaseClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { Plus, Trash2, Edit, X, Home, Upload, PlayCircle } from 'lucide-react';
+import { Plus, Trash2, Edit, X, Home, Upload, PlayCircle, Check, XCircle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -18,6 +19,7 @@ const AdminPGListings = () => {
 
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -64,6 +66,62 @@ const AdminPGListings = () => {
       toast({ title: 'Error', description: 'Failed to fetch listings', variant: 'destructive' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getApprovalStatus = (pg) => {
+    if (!pg || typeof pg !== 'object') return 'pending';
+
+    const hasStatus = Object.prototype.hasOwnProperty.call(pg, 'status');
+    const hasApprovalStatus = Object.prototype.hasOwnProperty.call(pg, 'approval_status');
+    const hasIsApproved = Object.prototype.hasOwnProperty.call(pg, 'is_approved');
+    const hasApproved = Object.prototype.hasOwnProperty.call(pg, 'approved');
+
+    // Legacy records: if no approval columns exist, treat as approved.
+    if (!hasStatus && !hasApprovalStatus && !hasIsApproved && !hasApproved) return 'approved';
+
+    const normalized = (v) => String(v || '').toLowerCase().trim();
+    if (hasStatus && normalized(pg.status)) return normalized(pg.status);
+    if (hasApprovalStatus && normalized(pg.approval_status)) return normalized(pg.approval_status);
+    if (hasIsApproved) return pg.is_approved ? 'approved' : 'pending';
+    if (hasApproved) return pg.approved ? 'approved' : 'pending';
+    return 'pending';
+  };
+
+  const getStatusBadge = (status) => {
+    const s = String(status || '').toLowerCase();
+    if (s === 'approved') return 'bg-green-100 text-green-700';
+    if (s === 'rejected') return 'bg-red-100 text-red-700';
+    return 'bg-yellow-100 text-yellow-800';
+  };
+
+  const updateApproval = async (pgId, newStatus) => {
+    try {
+      // Best-effort: update whichever approval columns exist in your Supabase table.
+      const tryPayloads = [
+        { status: newStatus, is_approved: newStatus === 'approved' },
+        { status: newStatus },
+        { approval_status: newStatus, is_approved: newStatus === 'approved' },
+        { approval_status: newStatus },
+        { is_approved: newStatus === 'approved' },
+        { approved: newStatus === 'approved' },
+      ];
+
+      let lastError = null;
+      for (const payload of tryPayloads) {
+        const { error } = await supabase.from('pg_listings').update(payload).eq('id', pgId);
+        if (!error) {
+          toast({ title: 'Updated', description: `Listing marked as ${newStatus}.` });
+          await fetchListings();
+          return;
+        }
+        lastError = error;
+      }
+
+      throw lastError;
+    } catch (error) {
+      console.error(error);
+      toast({ title: 'Error', description: error?.message || 'Failed to update status', variant: 'destructive' });
     }
   };
 
@@ -171,7 +229,7 @@ const AdminPGListings = () => {
         ? formData.facilities.split(',').map(f => f.trim()).filter(Boolean)
         : [];
 
-      const payload = {
+      const basePayload = {
         pg_name: formData.pg_name,
         location: formData.location,
         room_type: formData.room_type,
@@ -182,17 +240,45 @@ const AdminPGListings = () => {
         video_url: formData.video_url
       };
 
+      // Admin-created listings should be visible immediately.
+      // We try several common approval column patterns so it works with different Supabase schemas.
+      const approvalAttempts = [
+        { status: 'approved', is_approved: true },
+        { approval_status: 'approved', is_approved: true },
+        { status: 'approved' },
+        { approval_status: 'approved' },
+        { is_approved: true },
+        { approved: true },
+        {},
+      ];
+
+      let lastError = null;
+
       if (formData.id) {
-        const { error } = await supabase
-          .from('pg_listings')
-          .update(payload)
-          .eq('id', formData.id);
-        if (error) throw error;
+        for (const extra of approvalAttempts) {
+          const { error } = await supabase
+            .from('pg_listings')
+            .update({ ...basePayload, ...extra })
+            .eq('id', formData.id);
+          if (!error) {
+            lastError = null;
+            break;
+          }
+          lastError = error;
+        }
+        if (lastError) throw lastError;
       } else {
-        const { error } = await supabase
-          .from('pg_listings')
-          .insert([payload]);
-        if (error) throw error;
+        for (const extra of approvalAttempts) {
+          const { error } = await supabase
+            .from('pg_listings')
+            .insert([{ ...basePayload, ...extra }]);
+          if (!error) {
+            lastError = null;
+            break;
+          }
+          lastError = error;
+        }
+        if (lastError) throw lastError;
       }
 
       toast({ title: 'Success', description: 'PG listing saved successfully' });
@@ -223,12 +309,30 @@ const AdminPGListings = () => {
     }
   };
 
+  const displayedListings = (listings || []).filter((pg) => {
+    if (statusFilter === 'all') return true;
+    return getApprovalStatus(pg) === statusFilter;
+  });
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Manage PG Listings</h1>
 
-        <Dialog
+        <div className="flex items-center gap-3">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="h-10 rounded-md border border-gray-300 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+            title="Filter listings"
+          >
+            <option value="all">All</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+
+          <Dialog
           open={isDialogOpen}
           onOpenChange={(open) => {
             setIsDialogOpen(open);
@@ -258,128 +362,104 @@ const AdminPGListings = () => {
               <div className="px-6 py-4 pr-4">
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">PG Name</label>
+                    <label className="block text-sm font-medium mb-1">PG Name</label>
                     <Input
-                      required
-                      name="pg_name"
                       value={formData.pg_name}
-                      onChange={e => setFormData({ ...formData, pg_name: e.target.value })}
-                      placeholder="e.g. Stanza Living House"
+                      onChange={(e) => setFormData({ ...formData, pg_name: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium mb-1">Location</label>
+                    <Input
+                      value={formData.location}
+                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                      required
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Location</label>
+                      <label className="block text-sm font-medium mb-1">Room Type</label>
                       <Input
-                        required
-                        name="location"
-                        value={formData.location}
-                        onChange={e => setFormData({ ...formData, location: e.target.value })}
-                        placeholder="Greater Noida"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Room Type</label>
-                      <Input
-                        name="room_type"
                         value={formData.room_type}
-                        onChange={e => setFormData({ ...formData, room_type: e.target.value })}
-                        placeholder="Single/Double/Sharing"
+                        onChange={(e) => setFormData({ ...formData, room_type: e.target.value })}
                       />
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Rent Range (₹)</label>
+                      <label className="block text-sm font-medium mb-1">Rent Range</label>
                       <Input
-                        name="rent_range"
                         value={formData.rent_range}
-                        onChange={e => setFormData({ ...formData, rent_range: e.target.value })}
-                        placeholder="e.g. 6000-8000"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Contact Number</label>
-                      <Input
-                        name="contact_number"
-                        value={formData.contact_number}
-                        onChange={e => setFormData({ ...formData, contact_number: e.target.value })}
-                        placeholder="+91 9999999999"
+                        onChange={(e) => setFormData({ ...formData, rent_range: e.target.value })}
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Facilities (comma separated)</label>
+                    <label className="block text-sm font-medium mb-1">Facilities (comma separated)</label>
                     <Textarea
-                      name="facilities"
                       value={formData.facilities}
-                      onChange={e => setFormData({ ...formData, facilities: e.target.value })}
-                      placeholder="WiFi, AC, Food, Laundry, Power Backup"
+                      onChange={(e) => setFormData({ ...formData, facilities: e.target.value })}
+                      placeholder="WiFi, Food, AC, Laundry..."
                     />
                   </div>
 
-                  <div className="border p-4 rounded bg-gray-50 space-y-3">
-                    <h4 className="font-semibold text-gray-700 text-sm">Media</h4>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium mb-1">Contact Number (Owner)</label>
+                    <Input
+                      value={formData.contact_number}
+                      onChange={(e) => setFormData({ ...formData, contact_number: e.target.value })}
+                      placeholder="Shown only to admin"
+                    />
+                  </div>
 
-                    <div>
-                      <label className="block text-sm font-medium mb-2">PG Images (Max 5)</label>
+                  <div>
+                    <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+                      <Upload className="w-4 h-4" /> Images (Max 5)
+                    </label>
 
-                      <div className="flex items-center gap-4 mb-2 flex-wrap">
-                        <label className={`cursor-pointer px-4 py-2 rounded shadow transition flex items-center text-sm
-                          ${uploadingImage || formData.images.length >= 5 ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>
-                          <Upload className="w-4 h-4 mr-2" /> Upload
-                          <input
-                            type="file"
-                            multiple
-                            accept="image/png, image/jpeg, image/webp"
-                            onChange={handleImageUpload}
-                            className="hidden"
-                            disabled={uploadingImage || formData.images.length >= 5}
-                          />
-                        </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageUpload}
+                      disabled={uploadingImage}
+                    />
 
-                        {uploadingImage && (
-                          <p className="text-xs text-blue-600 font-medium">Uploading...</p>
-                        )}
+                    {uploadingImage && (
+                      <p className="text-xs text-blue-600 mt-1">Uploading...</p>
+                    )}
 
-                        <span className="text-sm text-gray-500">
-                          {formData.images.length}/5 images
-                        </span>
-                      </div>
-
-                      {formData.images.length > 0 && (
-                        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mt-2">
-                          {formData.images.map((img, idx) => (
-                            <div key={idx} className="relative group border rounded-lg overflow-hidden h-16 bg-white">
-                              <img src={img} alt="preview" className="h-full w-full object-cover" />
-                              <button
-                                type="button"
-                                onClick={() => removeImage(idx)}
-                                className="absolute top-0 right-0 bg-red-500 text-white p-0.5 rounded-bl opacity-0 group-hover:opacity-100 transition-opacity"
-                              >
-                                <X size={10} />
-                              </button>
-                            </div>
-                          ))}
+                    <div className="mt-3 grid grid-cols-2 sm:grid-cols-5 gap-3">
+                      {formData.images.map((img, idx) => (
+                        <div key={idx} className="relative group rounded border overflow-hidden">
+                          <img src={img} alt="" className="h-20 w-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(idx)}
+                            className="absolute top-1 right-1 bg-white/90 border rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
+                            title="Remove"
+                          >
+                            <X className="w-4 h-4 text-red-600" />
+                          </button>
                         </div>
-                      )}
+                      ))}
                     </div>
+                  </div>
 
-                    <div>
-                      <label className="block text-sm font-medium mb-1 flex items-center gap-2">
-                        <PlayCircle className="w-4 h-4" /> Video Tour (Optional)
-                      </label>
-                      <Input
-                        name="video_url"
-                        value={formData.video_url}
-                        onChange={e => setFormData({ ...formData, video_url: e.target.value })}
-                        placeholder="https://youtube.com/watch?v=..."
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Paste full YouTube link.</p>
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1 flex items-center gap-2">
+                      <PlayCircle className="w-4 h-4" /> Video Tour (Optional)
+                    </label>
+                    <Input
+                      name="video_url"
+                      value={formData.video_url}
+                      onChange={e => setFormData({ ...formData, video_url: e.target.value })}
+                      placeholder="https://youtube.com/watch?v=..."
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Paste full YouTube link.</p>
                   </div>
 
                   <div className="flex justify-end pt-2">
@@ -392,6 +472,7 @@ const AdminPGListings = () => {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden mt-6">
@@ -402,6 +483,7 @@ const AdminPGListings = () => {
               <th className="px-6 py-3 font-medium text-gray-500">PG Name</th>
               <th className="px-6 py-3 font-medium text-gray-500">Location</th>
               <th className="px-6 py-3 font-medium text-gray-500">Rent</th>
+              <th className="px-6 py-3 font-medium text-gray-500">Status</th>
               <th className="px-6 py-3 font-medium text-gray-500">Actions</th>
             </tr>
           </thead>
@@ -409,14 +491,14 @@ const AdminPGListings = () => {
           <tbody className="divide-y divide-gray-100">
             {loading ? (
               <tr>
-                <td colSpan="5" className="px-6 py-4 text-center">Loading...</td>
+                <td colSpan="6" className="px-6 py-4 text-center">Loading...</td>
               </tr>
-            ) : listings.length === 0 ? (
+            ) : displayedListings.length === 0 ? (
               <tr>
-                <td colSpan="5" className="px-6 py-4 text-center text-gray-500">No listings found</td>
+                <td colSpan="6" className="px-6 py-4 text-center text-gray-500">No listings found</td>
               </tr>
             ) : (
-              listings.map((pg) => {
+              displayedListings.map((pg) => {
                 let firstImage = null;
                 try {
                   if (typeof pg.images === 'string' && pg.images.trim() !== '') {
@@ -442,19 +524,64 @@ const AdminPGListings = () => {
                     <td className="px-6 py-4 text-gray-500">{pg.rent_range}</td>
 
                     <td className="px-6 py-4">
+                      {(() => {
+                        const status = getApprovalStatus(pg);
+                        return (
+                          <span
+                            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold capitalize ${getStatusBadge(status)}`}
+                          >
+                            {status}
+                          </span>
+                        );
+                      })()}
+                    </td>
+
+                    <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
                           onClick={() => openEdit(pg)}
                           className="p-1.5 hover:bg-blue-50 rounded text-blue-600"
+                          title="Edit"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
+
+                        {(() => {
+                          const status = getApprovalStatus(pg);
+                          if (status !== 'approved') {
+                            return (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => updateApproval(pg.id, 'approved')}
+                                  className="p-1.5 hover:bg-green-50 rounded text-green-600"
+                                  title="Approve"
+                                >
+                                  <Check className="h-4 w-4" />
+                                </button>
+
+                                {status !== 'rejected' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => updateApproval(pg.id, 'rejected')}
+                                    className="p-1.5 hover:bg-red-50 rounded text-red-600"
+                                    title="Reject"
+                                  >
+                                    <XCircle className="h-4 w-4" />
+                                  </button>
+                                )}
+                              </>
+                            );
+                          }
+                          return null;
+                        })()}
 
                         <button
                           type="button"
                           onClick={() => handleDelete(pg.id)}
                           className="p-1.5 hover:bg-red-50 rounded text-red-600"
+                          title="Delete"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>

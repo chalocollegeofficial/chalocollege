@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
@@ -17,6 +16,7 @@ import ContactPage from '@/pages/ContactPage';
 import BlogPage from '@/pages/BlogPage';
 import BlogDetailPage from '@/pages/BlogDetailPage';
 import PGListingsPage from '@/pages/PGListingsPage';
+import PGRegisterPage from '@/pages/PGRegisterPage';
 import MentorshipPage from '@/pages/MentorshipPage';
 
 // Admin Imports
@@ -89,6 +89,7 @@ function App() {
                 <Route path="/colleges" element={<CollegeListingsPage />} />
                 <Route path="/colleges/:id" element={<CollegeDetailPage />} />
                 <Route path="/get-pg" element={<PGListingsPage />} />
+                <Route path="/register-pg" element={<PGRegisterPage />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/blog" element={<BlogPage />} />
                 <Route path="/blog/:id" element={<BlogDetailPage />} />

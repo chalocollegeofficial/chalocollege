@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import ImageGallery from '@/components/common/ImageGallery';
 import PGEnquiryModal from '@/components/PGEnquiryModal';
-import { Loader2, Search, MapPin, Home, Phone, PlayCircle, BedDouble, IndianRupee } from 'lucide-react';
+import { Loader2, Search, MapPin, Home, PlayCircle, BedDouble, IndianRupee, ShieldCheck } from 'lucide-react';
 
 const PGListingsPage = () => {
   const { toast } = useToast();
@@ -16,6 +17,7 @@ const PGListingsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showEnquiry, setShowEnquiry] = useState(false);
   const [prefillLocation, setPrefillLocation] = useState('');
+  const [selectedPg, setSelectedPg] = useState(null);
 
   useEffect(() => {
     fetchListings();
@@ -43,19 +45,40 @@ const PGListingsPage = () => {
     }
   };
 
-  const filtered = useMemo(() => {
-    const q = (searchTerm || '').trim().toLowerCase();
-    if (!q) return listings;
+  const isApproved = (pg) => {
+    if (!pg || typeof pg !== 'object') return false;
 
-    return (listings || []).filter((pg) => {
+    const hasIsApproved = Object.prototype.hasOwnProperty.call(pg, 'is_approved');
+    const hasApproved = Object.prototype.hasOwnProperty.call(pg, 'approved');
+    const hasStatus = Object.prototype.hasOwnProperty.call(pg, 'status');
+    const hasApprovalStatus = Object.prototype.hasOwnProperty.call(pg, 'approval_status');
+
+    // Legacy records: if no approval columns exist, treat as approved.
+    if (!hasIsApproved && !hasApproved && !hasStatus && !hasApprovalStatus) return true;
+
+    if (hasIsApproved && pg.is_approved === true) return true;
+    if (hasApproved && pg.approved === true) return true;
+    if (hasStatus && String(pg.status || '').toLowerCase() === 'approved') return true;
+    if (hasApprovalStatus && String(pg.approval_status || '').toLowerCase() === 'approved') return true;
+
+    return false;
+  };
+
+  const filtered = useMemo(() => {
+    const approvedListings = (listings || []).filter(isApproved);
+    const q = (searchTerm || '').trim().toLowerCase();
+    if (!q) return approvedListings;
+
+    return approvedListings.filter((pg) => {
       const name = (pg.pg_name || '').toLowerCase();
       const loc = (pg.location || '').toLowerCase();
       return name.includes(q) || loc.includes(q);
     });
   }, [listings, searchTerm]);
 
-  const openEnquiry = (location) => {
+  const openEnquiry = ({ location = '', pg = null } = {}) => {
     setPrefillLocation(location || '');
+    setSelectedPg(pg);
     setShowEnquiry(true);
   };
 
@@ -78,11 +101,11 @@ const PGListingsPage = () => {
         />
       </Helmet>
 
-      {/* Enquiry Modal */}
       <PGEnquiryModal
         isOpen={showEnquiry}
         onClose={() => setShowEnquiry(false)}
         prefillLocation={prefillLocation}
+        selectedPg={selectedPg}
       />
 
       <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
@@ -104,13 +127,33 @@ const PGListingsPage = () => {
                 />
               </div>
 
-              <Button
-                onClick={() => openEnquiry('')}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                Send Enquiry
-              </Button>
+              {/* ✅ Actions */}
+              <div className="flex items-center gap-3">
+                <Button
+                  onClick={() => openEnquiry({ location: '', pg: null })}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Send Enquiry
+                </Button>
+
+                {/* ✅ List Your PG moved here */}
+                <Button
+                  asChild
+                  variant="outline"
+                  className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                >
+                  <Link to="/register-pg">List Your PG</Link>
+                </Button>
+              </div>
             </div>
+
+            {/* Optional small helper text under header */}
+            {/* <div className="mt-4 flex items-center gap-2 text-xs text-gray-500">
+              <ShieldCheck className="h-4 w-4 text-green-600" />
+              <span>
+                Verified listings only. Contact details are shared after enquiry (phone number is not shown publicly).
+              </span>
+            </div> */}
           </div>
         </section>
 
@@ -142,10 +185,18 @@ const PGListingsPage = () => {
                   return (
                     <div
                       key={pg.id}
-                      className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all hover:-translate-y-1"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => openEnquiry({ location: pg.location, pg })}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          openEnquiry({ location: pg.location, pg });
+                        }
+                      }}
+                      className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer"
                     >
                       <div className="grid md:grid-cols-3 gap-6">
-                        {/* Image */}
                         <div className="md:col-span-1">
                           <ImageGallery
                             images={pg.images}
@@ -154,7 +205,6 @@ const PGListingsPage = () => {
                           />
                         </div>
 
-                        {/* Details */}
                         <div className="md:col-span-2 p-6">
                           <div className="flex items-start justify-between mb-3">
                             <div>
@@ -174,6 +224,13 @@ const PGListingsPage = () => {
                             </div>
                           </div>
 
+                          <div className="mb-4 flex items-center gap-2 text-xs text-gray-500">
+                            <ShieldCheck className="h-4 w-4 text-green-600" />
+                            <span>
+                              Verified listings only. Contact details are shared after you send an enquiry.
+                            </span>
+                          </div>
+
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                             <div className="flex items-center text-gray-600">
                               <BedDouble className="h-4 w-4 mr-2 text-purple-600" />
@@ -188,14 +245,6 @@ const PGListingsPage = () => {
                               <div>
                                 <p className="text-xs text-gray-500">Rent</p>
                                 <p className="font-semibold text-gray-900">{pg.rent_range || 'N/A'}</p>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center text-gray-600">
-                              <Phone className="h-4 w-4 mr-2 text-blue-600" />
-                              <div>
-                                <p className="text-xs text-gray-500">Contact</p>
-                                <p className="font-semibold text-gray-900">{pg.contact_number || 'N/A'}</p>
                               </div>
                             </div>
                           </div>
@@ -218,7 +267,10 @@ const PGListingsPage = () => {
 
                           <div className="flex flex-wrap gap-3 items-center">
                             <Button
-                              onClick={() => openEnquiry(pg.location)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openEnquiry({ location: pg.location, pg });
+                              }}
                               className="bg-blue-600 hover:bg-blue-700"
                             >
                               Send Enquiry
@@ -229,6 +281,7 @@ const PGListingsPage = () => {
                                 href={pg.video_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
                                 className="inline-flex items-center justify-center h-10 px-4 rounded-md border border-red-200 bg-white text-red-600 hover:bg-red-50 hover:text-red-700 font-medium transition-colors text-sm"
                                 title="Watch Video"
                               >
@@ -237,8 +290,6 @@ const PGListingsPage = () => {
                               </a>
                             )}
                           </div>
-
-                          {/* ✅ IMPORTANT: No Edit/Delete buttons on public page */}
                         </div>
                       </div>
                     </div>

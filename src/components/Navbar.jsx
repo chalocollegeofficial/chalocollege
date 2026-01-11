@@ -16,8 +16,6 @@ const Navbar = () => {
     { name: 'Mentorship', path: '/mentorship' },
     { name: 'Get PG', path: '/get-pg' },
     { name: 'Blog', path: '/blog' },
-    // ✅ removed Contact from list because it will be shown as the button
-    // { name: 'Contact', path: '/contact' },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -55,7 +53,7 @@ const Navbar = () => {
               </Link>
             ))}
 
-            {/* ✅ Contact button (replaces Get Started) */}
+            {/* Contact button */}
             <Button
               asChild
               className="ml-4 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold"
@@ -104,7 +102,6 @@ const Navbar = () => {
                 </Link>
               ))}
 
-              {/* ✅ Contact button (replaces Get Started) */}
               <Button
                 asChild
                 className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold mt-2"

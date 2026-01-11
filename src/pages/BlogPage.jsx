@@ -12,7 +12,7 @@ const BlogPage = () => {
   const navigate = useNavigate();
 
   // ✅ Added "College Compare"
-  const categories = ['Admissions', 'Exams', 'Career', 'Student Life', 'Tips', 'College Compare'];
+  const categories = ['Admissions', 'Exams', 'Career', 'Student Life', 'Tips', 'Compare & Decide'];
 
   useEffect(() => {
     fetchPosts();

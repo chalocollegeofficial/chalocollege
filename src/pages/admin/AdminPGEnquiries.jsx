@@ -50,6 +50,20 @@ const AdminPGEnquiries = () => {
     enq.budget?.toLowerCase().includes(filter.toLowerCase())
   );
 
+  const extractInterestedPg = (enquiry) => {
+    if (!enquiry) return '';
+    const direct = enquiry.pg_name || enquiry.pg_listing_name || enquiry.pg || '';
+    if (direct) return direct;
+
+    const text = String(enquiry.additional_requirements || '');
+    const match = text.match(/Interested\s+in\s*:\s*(.+)/i);
+    if (match && match[1]) {
+      // Take only the first line after the label
+      return match[1].split('\n')[0].trim();
+    }
+    return '';
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -73,6 +87,13 @@ const AdminPGEnquiries = () => {
             <div key={enquiry.id} className="bg-white p-6 rounded-lg border shadow-sm hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start">
                 <div>
+                  {extractInterestedPg(enquiry) && (
+                    <div className="mb-3">
+                      <span className="inline-flex items-center rounded-full bg-blue-50 text-blue-700 px-3 py-1 text-xs font-semibold">
+                        PG: {extractInterestedPg(enquiry)}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2 mb-2">
                     <h3 className="text-lg font-bold text-gray-900">{enquiry.name}</h3>
                     <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">

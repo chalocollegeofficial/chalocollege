@@ -6,7 +6,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { Loader2 } from 'lucide-react';
 import { validateCity, validateName, validateEmail, validatePhone, handleNumericInput } from '@/utils/validation';
 
-const PGEnquiryModal = ({ isOpen, onClose, prefillLocation = '' }) => {
+const PGEnquiryModal = ({ isOpen, onClose, prefillLocation = '', selectedPg = null }) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -21,16 +21,24 @@ const PGEnquiryModal = ({ isOpen, onClose, prefillLocation = '' }) => {
 
   const [errors, setErrors] = useState({});
 
-  // ✅ When modal opens or prefill changes, update preferred_location
+  // ✅ When modal opens or prefill changes, update preferred_location + (optionally) prefill PG context
   useEffect(() => {
     if (isOpen) {
-      setFormData(prev => ({
-        ...prev,
-        preferred_location: prefillLocation || prev.preferred_location || ''
-      }));
+      setFormData(prev => {
+        const pgName = selectedPg?.pg_name || selectedPg?.name || '';
+
+        // If user hasn't typed anything yet, prefill an "Interested in" line.
+        const shouldPrefillPgLine = !!pgName && (!prev.additional_requirements || prev.additional_requirements.trim() === '');
+
+        return {
+          ...prev,
+          preferred_location: prefillLocation || prev.preferred_location || '',
+          additional_requirements: shouldPrefillPgLine ? `Interested in: ${pgName}` : prev.additional_requirements,
+        };
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, prefillLocation]);
+  }, [isOpen, prefillLocation, selectedPg]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -72,8 +80,40 @@ const PGEnquiryModal = ({ isOpen, onClose, prefillLocation = '' }) => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.from('pg_enquiries').insert([formData]);
-      if (error) throw error;
+      const pgContext = {
+        pg_id: selectedPg?.id ?? null,
+        pg_name: selectedPg?.pg_name ?? null,
+      };
+
+      // Try inserting with PG context columns (recommended).
+      // If your Supabase table doesn't yet have these columns, we fall back to
+      // inserting without them while still keeping PG info inside additional_requirements.
+      const attemptPayload = {
+        ...formData,
+        ...pgContext,
+      };
+
+      const { error } = await supabase.from('pg_enquiries').insert([attemptPayload]);
+
+      if (error) {
+        const msg = (error?.message || '').toLowerCase();
+        const looksLikeMissingColumn = msg.includes('column') || msg.includes('schema') || msg.includes('does not exist');
+        if (!looksLikeMissingColumn) throw error;
+
+        // Fallback payload that will work even without pg_id/pg_name columns.
+        // Ensure PG name is still stored inside additional_requirements.
+        const pgName = selectedPg?.pg_name || '';
+        const fallback = {
+          ...formData,
+          additional_requirements: pgName
+            ? formData.additional_requirements?.includes('Interested in:')
+              ? formData.additional_requirements
+              : `Interested in: ${pgName}${formData.additional_requirements ? `\n\n${formData.additional_requirements}` : ''}`
+            : formData.additional_requirements,
+        };
+        const { error: error2 } = await supabase.from('pg_enquiries').insert([fallback]);
+        if (error2) throw error2;
+      }
 
       toast({
         title: "Enquiry Sent!",
@@ -113,9 +153,11 @@ const PGEnquiryModal = ({ isOpen, onClose, prefillLocation = '' }) => {
       {/* ✅ Added explicit bg + text classes (safe even if theme vars change later) */}
       <DialogContent className="sm:max-w-[520px] bg-white text-gray-900 border border-gray-200 shadow-2xl">
         <DialogHeader>
-          <DialogTitle className="text-gray-900">Find Your Perfect PG</DialogTitle>
+          <DialogTitle className="text-gray-900">
+            {selectedPg?.pg_name ? `Enquiry for ${selectedPg.pg_name}` : 'Find Your Perfect PG'}
+          </DialogTitle>
           <DialogDescription className="text-gray-600">
-            Fill in your details and preferences to get the best PG options.
+            Fill in your details and preferences. Our team will connect you with the PG owner.
           </DialogDescription>
         </DialogHeader>
 
