@@ -11,7 +11,8 @@ const BlogPage = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const navigate = useNavigate();
 
-  const categories = ['Admissions', 'Exams', 'Career', 'Student Life', 'Tips'];
+  // ✅ Added "College Compare"
+  const categories = ['Admissions', 'Exams', 'Career', 'Student Life', 'Tips', 'College Compare'];
 
   useEffect(() => {
     fetchPosts();
@@ -84,7 +85,11 @@ const BlogPage = () => {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredPosts.map((post) => (
-              <div key={post.id} onClick={() => navigate(`/blog/${post.id}`)} className="cursor-pointer bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow border border-gray-100 group">
+              <div
+                key={post.id}
+                onClick={() => navigate(`/blog/${post.id}`)}
+                className="cursor-pointer bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow border border-gray-100 group"
+              >
                 <div className="h-48 overflow-hidden">
                   <img 
                     src={post.image || "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80"} 
@@ -93,7 +98,7 @@ const BlogPage = () => {
                   />
                 </div>
                 <div className="p-6">
-                   {post.category && (
+                  {post.category && (
                     <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full mb-2 inline-block">
                       {post.category}
                     </span>

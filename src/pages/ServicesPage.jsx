@@ -9,6 +9,34 @@ const ServicesPage = () => {
   const navigate = useNavigate();
 
   const services = [
+    // ✅ USP 1 added (Loan services)
+    {
+      icon: Award,
+      title: 'Student Loan Assistance',
+      description: 'Support for accessing education loan services to help you finance your studies with ease.',
+      features: [
+        'Loan eligibility guidance',
+        'Documentation support',
+        'Bank/NBFC loan process assistance',
+        'Application and follow-up help',
+        'Repayment and future planning guidance',
+      ],
+      color: 'bg-green-100 text-green-600',
+    },
+    // ✅ USP 2 added (Mentorship till placement + career guidance)
+    {
+      icon: UserCheck,
+      title: 'Mentorship Till Placement',
+      description: 'Guidance from admission to placement, along with future career direction and planning.',
+      features: [
+        'Admission-to-placement mentorship',
+        'Skill and profile-building guidance',
+        'Internship and placement support',
+        'Career roadmap planning',
+        'Continuous future career guidance',
+      ],
+      color: 'bg-blue-100 text-blue-600',
+    },
     {
       icon: Search,
       title: 'College Search & Selection',
@@ -87,6 +115,7 @@ const ServicesPage = () => {
       ],
       color: 'bg-indigo-100 text-indigo-600',
     },
+    
   ];
 
   return (

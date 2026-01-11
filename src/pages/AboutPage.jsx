@@ -5,6 +5,18 @@ import { Target, Eye, Award, Users, TrendingUp, Heart } from 'lucide-react';
 
 const AboutPage = () => {
   const whyChooseUs = [
+    // ✅ USP 1 added (Loan services)
+    {
+      icon: TrendingUp,
+      title: 'Student Loan Assistance',
+      description: 'We help students access education loan services to support their studies and admissions.',
+    },
+    // ✅ USP 2 added (Mentorship till placement + career guidance)
+    {
+      icon: Users,
+      title: 'Mentorship Till Placement',
+      description: 'We guide students from admission to placement and also provide future career guidance.',
+    },
     {
       icon: Users,
       title: 'Expert Counselors',
@@ -25,6 +37,7 @@ const AboutPage = () => {
       title: 'Student-Centric Approach',
       description: 'We prioritize your dreams, goals, and individual needs above all.',
     },
+    
   ];
 
   return (

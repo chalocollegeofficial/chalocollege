@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react'; // Removed GraduationCap as it's replaced by an image
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Youtube } from 'lucide-react'; // Removed GraduationCap as it's replaced by an image
 
 const Footer = () => {
   return (
@@ -25,17 +25,20 @@ const Footer = () => {
               Your trusted partner in finding the perfect college and achieving your educational dreams.
             </p>
             <div className="flex space-x-3">
-              <a href="https://www.facebook.com/share/1H7noDpFyW/?mibextid=wwXIfr" className="bg-gray-800 p-2 rounded-lg hover:bg-blue-600 transition-colors">
+              <a href="https://www.facebook.com/people/Aao-College/61583548201621/" className="bg-gray-800 p-2 rounded-lg hover:bg-blue-600 transition-colors" target='blank'>
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="https://x.com/Aao_college?s=21" className="bg-gray-800 p-2 rounded-lg hover:bg-blue-600 transition-colors">
+              <a href="https://x.com/Aao_college?s=21" className="bg-gray-800 p-2 rounded-lg hover:bg-blue-600 transition-colors" target='blank'>
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="https://www.instagram.com/Aaocollegeofficial?igsh=MXhoamVlZTd1M2RoYQ%3D%3D&utm_source=qr" className="bg-gray-800 p-2 rounded-lg hover:bg-blue-600 transition-colors">
+              <a href="https://www.instagram.com/aao_college/?igsh=MTJsc252aHQ3ZDRmbA%3D%3D#" className="bg-gray-800 p-2 rounded-lg hover:bg-blue-600 transition-colors" target='blank'>
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="#" className="bg-gray-800 p-2 rounded-lg hover:bg-blue-600 transition-colors">
+              <a href="https://www.linkedin.com/in/chalo-college-b54527398/" className="bg-gray-800 p-2 rounded-lg hover:bg-blue-600 transition-colors" target='blank'>
                 <Linkedin className="h-5 w-5" />
+              </a>
+              <a href="https://www.youtube.com/@aaocollege" className="bg-gray-800 p-2 rounded-lg hover:bg-blue-600 transition-colors" target='blank'>
+                <Youtube className="h-5 w-5" />
               </a>
             </div>
           </div>

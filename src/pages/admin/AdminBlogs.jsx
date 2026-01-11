@@ -38,6 +38,9 @@ const AdminBlogs = () => {
   });
   const [editingId, setEditingId] = useState(null);
 
+  // ✅ Categories dropdown list (includes "College Compare")
+  const blogCategories = ['Admissions', 'Exams', 'Career', 'Student Life', 'Tips', 'College Compare'];
+
   useEffect(() => {
     fetchPosts();
   }, []);
@@ -52,12 +55,6 @@ const AdminBlogs = () => {
         if (error) throw error;
         setPosts(postsData || []);
 
-        // Fetch Analytics - Comment Counts
-        // We can't use .count() easily with .select() on joined table in one go for list, 
-        // so we'll fetch counts separately or use a rpc if we had one. 
-        // For simplicity in frontend-only env, we fetch all comments counts grouped by blog_id.
-        // Or cleaner: fetch count for each blog (N+1 but simple for small scale) or fetch all comments.
-        // Let's fetch all comments lightweight to count.
         const { data: commentsData } = await supabase
             .from('blog_comments')
             .select('blog_id');
@@ -211,7 +208,6 @@ const AdminBlogs = () => {
     setIsCommentsOpen(true);
   };
 
-  // Moderation Actions
   const updateCommentStatus = async (comment, newStatus) => {
     const { error } = await supabase
       .from('blog_comments')
@@ -221,7 +217,6 @@ const AdminBlogs = () => {
     if (!error) {
       toast({ title: `Comment marked as ${newStatus}` });
       fetchComments(selectedPostId);
-      // Refresh analytics count
       fetchPosts();
     } else {
         toast({ variant: "destructive", title: "Update failed" });
@@ -285,10 +280,28 @@ const AdminBlogs = () => {
                         <label className="block text-sm font-medium mb-1">Title</label>
                         <input required className="w-full p-2 border rounded" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} placeholder="Blog Title"/>
                     </div>
+
+                    {/* ✅ Category dropdown */}
                     <div>
                         <label className="block text-sm font-medium mb-1">Category</label>
-                        <input className="w-full p-2 border rounded" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} placeholder="e.g. Career, Exam Tips"/>
+                        <select
+                          className="w-full p-2 border rounded bg-white"
+                          value={formData.category}
+                          onChange={e => setFormData({ ...formData, category: e.target.value })}
+                        >
+                          <option value="">Select category</option>
+
+                          {/* Preserve existing category on edit if it's not in the preset list */}
+                          {formData.category && !blogCategories.includes(formData.category) && (
+                            <option value={formData.category}>{formData.category}</option>
+                          )}
+
+                          {blogCategories.map((cat) => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                        </select>
                     </div>
+
                     <div>
                         <label className="block text-sm font-medium mb-1">Author</label>
                         <input required className="w-full p-2 border rounded" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})} placeholder="Author Name"/>
@@ -313,7 +326,7 @@ const AdminBlogs = () => {
                         <div className="flex items-start gap-4">
                             <div className="w-24 h-24 bg-gray-100 rounded overflow-hidden flex-shrink-0 border">
                                 {formData.image ? 
-                                    <img src={formData.image} className="w-full h-full object-cover"/> : 
+                                    <img src={formData.image} className="w-full h-full object-cover" alt="Thumbnail" /> : 
                                     <div className="flex items-center justify-center h-full text-gray-400 text-xs">No Image</div>
                                 }
                             </div>
@@ -332,14 +345,14 @@ const AdminBlogs = () => {
                         <div className="flex flex-wrap gap-2">
                             {formData.images.map((img, i) => (
                                 <div key={i} className="relative group w-16 h-16 bg-gray-50 border rounded overflow-hidden">
-                                <img src={img} alt={`Gallery ${i}`} className="w-full h-full object-cover" />
-                                <button 
-                                    type="button" 
-                                    onClick={() => removeAdditionalImage(i)}
-                                    className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                                >
-                                    <X size={16} />
-                                </button>
+                                  <img src={img} alt={`Gallery ${i}`} className="w-full h-full object-cover" />
+                                  <button 
+                                      type="button" 
+                                      onClick={() => removeAdditionalImage(i)}
+                                      className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                                  >
+                                      <X size={16} />
+                                  </button>
                                 </div>
                             ))}
                         </div>
@@ -373,7 +386,7 @@ const AdminBlogs = () => {
             <div key={post.id} className="bg-white p-5 rounded-lg shadow-sm border border-gray-200 flex flex-col md:flex-row justify-between gap-4">
               <div className="flex gap-5">
                 <div className="w-24 h-24 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden">
-                    {post.image ? <img src={post.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-400"><EyeOff size={20}/></div>}
+                    {post.image ? <img src={post.image} className="w-full h-full object-cover" alt="Post thumbnail" /> : <div className="w-full h-full flex items-center justify-center text-gray-400"><EyeOff size={20}/></div>}
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
