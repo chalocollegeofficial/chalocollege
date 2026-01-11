@@ -279,7 +279,7 @@ const ContactPage = () => {
           className="text-center mb-16 space-y-4"
         >
           <span className="inline-block py-1 px-3 rounded-full bg-blue-100 text-blue-700 text-sm font-semibold tracking-wide mb-2 border border-blue-200">
-            Admissions Open 2025-26
+            Admissions Open for 2026 Batch
           </span>
           <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
             Start Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-violet-600">College Journey</span>

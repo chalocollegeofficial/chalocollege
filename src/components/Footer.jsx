@@ -11,9 +11,9 @@ const Footer = () => {
             <div className="flex items-center space-x-2 mb-4">
               {/* New Logo Image */}
               <img 
-                src="/logo.png" 
+                src="/nobglogo.png" 
                 alt="Aao College Logo" 
-                className="h-9 w-9 object-contain" 
+                className="h-12 w-12 object-contain" 
               />
               {/* Branded Title */}
               <span className="text-xl font-bold">
@@ -67,11 +67,11 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-start space-x-3">
                 <Mail className="h-5 w-5 text-blue-400 mt-1 flex-shrink-0" />
-                <span className="text-gray-400">info@Aaocollege.com</span>
+                <span className="text-gray-400">info@aaocollege.com</span>
               </li>
               <li className="flex items-start space-x-3">
                 <Phone className="h-5 w-5 text-blue-400 mt-1 flex-shrink-0" />
-                <span className="text-gray-400">+91 7065657041</span>
+                <span className="text-gray-400">+91 7065657041 /45</span>
               </li>
               <li className="flex items-start space-x-3">
                 <MapPin className="h-5 w-5 text-blue-400 mt-1 flex-shrink-0" />

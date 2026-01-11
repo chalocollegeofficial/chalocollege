@@ -17,6 +17,7 @@ const CollegeListingsPage = () => {
 
   const [filters, setFilters] = useState({
     state: '',
+    city: '',
     course: '',
     collegeName: '',
     category: '',
@@ -27,12 +28,14 @@ const CollegeListingsPage = () => {
     const search = searchParams.get('search');
     const course = searchParams.get('course');
     const loc = searchParams.get('location');
+    const city = searchParams.get('city');
 
     setFilters((prev) => ({
       ...prev,
       collegeName: search || '',
       course: course || '',
       state: loc || '',
+      city: city || '',
     }));
 
     fetchColleges();
@@ -72,6 +75,16 @@ const CollegeListingsPage = () => {
     return [];
   };
 
+  // ✅ Build a dynamic list of cities for the sidebar filter
+  const cities = React.useMemo(() => {
+    const unique = new Set();
+    for (const c of colleges) {
+      const city = (c.city || '').trim();
+      if (city) unique.add(city);
+    }
+    return Array.from(unique).sort((a, b) => a.localeCompare(b));
+  }, [colleges]);
+
   const filteredColleges = colleges.filter((college) => {
     if (filters.collegeName) {
       const searchTerm = filters.collegeName.toLowerCase();
@@ -81,8 +94,14 @@ const CollegeListingsPage = () => {
 
     if (filters.state) {
       const filterState = filters.state.toLowerCase();
-      const locationString = `${college.state || ''} ${college.city || ''}`.toLowerCase();
-      if (!locationString.includes(filterState)) return false;
+      const collegeState = (college.state || '').toLowerCase();
+      if (!collegeState.includes(filterState)) return false;
+    }
+
+    if (filters.city) {
+      const filterCity = filters.city.toLowerCase();
+      const collegeCity = (college.city || '').toLowerCase();
+      if (!collegeCity.includes(filterCity)) return false;
     }
 
     if (filters.course) {
@@ -146,6 +165,7 @@ const CollegeListingsPage = () => {
                     onClose={() => setShowFilters(false)}
                     onFilterChange={handleFilterChange}
                     filters={filters}
+                    cities={cities}
                   />
                 </div>
               </div>
@@ -180,7 +200,7 @@ const CollegeListingsPage = () => {
                     <p className="text-gray-500 mt-2">Try adjusting your filters.</p>
                     <Button
                       variant="link"
-                      onClick={() => setFilters({ state: '', course: '', collegeName: '', category: '' })}
+                      onClick={() => setFilters({ state: '', city: '', course: '', collegeName: '', category: '' })}
                       className="text-blue-600 mt-2"
                     >
                       Clear all filters

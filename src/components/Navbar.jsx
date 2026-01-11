@@ -33,7 +33,7 @@ const Navbar = () => {
           <Link to="/" className="flex items-center space-x-2 group">
             {/* New Logo Image */}
             <img 
-              src="/logo.png" 
+              src="/nobglogo.png" 
               alt="Aao College Logo" 
               className="h-16 w-16 object-contain" 
             />

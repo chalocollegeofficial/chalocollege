@@ -135,7 +135,7 @@ const HeroSection = () => {
               <div className="flex items-center space-x-3">
                 <div className="bg-blue-100 rounded-lg">
                   <img 
-                    src="/logo.png" 
+                    src="/nobglogo.png" 
                     alt="Aao College Logo small icon" 
                     className="h-14 w-14 object-contain" 
                   />

@@ -2,7 +2,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const FilterSidebar = ({ show, onClose, onFilterChange, filters }) => {
+const FilterSidebar = ({ show, onClose, onFilterChange, filters, cities = [] }) => {
   const states = [
     'Delhi', 'Uttar Pradesh', 'Maharashtra', 'Karnataka', 'Tamil Nadu',
     'Telangana', 'West Bengal', 'Rajasthan', 'Punjab', 'Haryana', 'Madhya Pradesh'
@@ -22,6 +22,7 @@ const FilterSidebar = ({ show, onClose, onFilterChange, filters }) => {
   const handleClear = () => {
     onFilterChange({
       state: '',
+      city: '',
       course: '',
       collegeName: '',
       category: '',
@@ -85,6 +86,21 @@ const FilterSidebar = ({ show, onClose, onFilterChange, filters }) => {
                 <option value="">All Locations</option>
                 {states.map((s) => (
                   <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* ✅ City filter */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-3">City</h3>
+              <select
+                className="w-full border rounded-md px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-100 outline-none"
+                value={filters.city || ''}
+                onChange={(e) => handleChange('city', e.target.value)}
+              >
+                <option value="">All Cities</option>
+                {cities.map((c) => (
+                  <option key={c} value={c}>{c}</option>
                 ))}
               </select>
             </div>
