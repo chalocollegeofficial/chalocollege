@@ -7,6 +7,7 @@ import CollegeCard from '@/components/colleges/CollegeCard';
 import FilterSidebar from '@/components/colleges/FilterSidebar';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useLocation } from 'react-router-dom';
+import { collegeMatchesCourseCategory, getCourseCategoryByKey } from '@/lib/courseCategories';
 
 const CollegeListingsPage = () => {
   const [showFilters, setShowFilters] = useState(false);
@@ -21,6 +22,7 @@ const CollegeListingsPage = () => {
     course: '',
     collegeName: '',
     category: '',
+    courseCategory: '',
   });
 
   useEffect(() => {
@@ -29,6 +31,7 @@ const CollegeListingsPage = () => {
     const course = searchParams.get('course');
     const loc = searchParams.get('location');
     const city = searchParams.get('city');
+    const courseCategory = searchParams.get('courseCategory');
 
     setFilters((prev) => ({
       ...prev,
@@ -36,6 +39,7 @@ const CollegeListingsPage = () => {
       course: course || '',
       state: loc || '',
       city: city || '',
+      courseCategory: courseCategory || '',
     }));
 
     fetchColleges();
@@ -118,6 +122,11 @@ const CollegeListingsPage = () => {
       if (!category.includes(filterCat)) return false;
     }
 
+    // ✅ course classification filter (from home page category cards)
+    if (filters.courseCategory) {
+      if (!collegeMatchesCourseCategory(college, filters.courseCategory)) return false;
+    }
+
     return true;
   });
 
@@ -175,6 +184,22 @@ const CollegeListingsPage = () => {
                   <p className="text-gray-600 text-sm">
                     {loading ? 'Loading...' : `Showing ${filteredColleges.length} results`}
                   </p>
+
+                  {/* ✅ If user came from Home page category cards */}
+                  {filters.courseCategory && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                        {getCourseCategoryByKey(filters.courseCategory)?.label || 'Category'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleFilterChange({ courseCategory: '' })}
+                        className="text-xs text-gray-500 hover:text-gray-900 underline"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {loading ? (
@@ -200,7 +225,16 @@ const CollegeListingsPage = () => {
                     <p className="text-gray-500 mt-2">Try adjusting your filters.</p>
                     <Button
                       variant="link"
-                      onClick={() => setFilters({ state: '', city: '', course: '', collegeName: '', category: '' })}
+                      onClick={() =>
+                        setFilters({
+                          state: '',
+                          city: '',
+                          course: '',
+                          collegeName: '',
+                          category: '',
+                          courseCategory: '',
+                        })
+                      }
                       className="text-blue-600 mt-2"
                     >
                       Clear all filters

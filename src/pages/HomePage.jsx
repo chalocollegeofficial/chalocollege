@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import NewsTicker from '@/components/home/NewsTicker';
 import HeroSection from '@/components/home/HeroSection';
+import CourseCategoriesSection from '@/components/home/CourseCategoriesSection';
 import ServiceHighlights from '@/components/home/ServiceHighlights';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
 import CTASection from '@/components/home/CTASection';
@@ -39,6 +40,7 @@ const HomePage = () => {
         <NewsTicker />
 
         <HeroSection />
+        <CourseCategoriesSection />
         <ServiceHighlights />
         <EMICalculatorSection />
         <SuccessStoriesSection />

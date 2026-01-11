@@ -26,6 +26,7 @@ const FilterSidebar = ({ show, onClose, onFilterChange, filters, cities = [] }) 
       course: '',
       collegeName: '',
       category: '',
+      courseCategory: '',
     });
   };
 
