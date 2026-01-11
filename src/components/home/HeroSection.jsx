@@ -34,7 +34,7 @@ const HeroSection = () => {
 
   return (
     <section className="relative overflow-hidden">
-      <div className="container mx-auto px-4 py-16 md:py-24">
+      <div className="container mx-auto px-4 pt-12 pb-16 md:pt-12 md:pb-16">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <motion.div
             initial={{ opacity: 0, x: -50 }}

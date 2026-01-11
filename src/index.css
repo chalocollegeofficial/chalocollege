@@ -94,3 +94,35 @@ body {
     overflow: hidden;
   }
 }
+
+/* News ticker (marquee) */
+@keyframes news-ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    /* We duplicate items in the track, so -50% creates a seamless loop */
+    transform: translateX(-50%);
+  }
+}
+
+.news-ticker-track {
+  display: inline-flex;
+  animation-name: news-ticker-scroll;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+/* Pause on hover */
+.news-ticker-track:hover {
+  animation-play-state: paused;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .news-ticker-track {
+    animation: none !important;
+    transform: none !important;
+  }
+}
