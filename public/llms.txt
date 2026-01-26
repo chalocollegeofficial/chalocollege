@@ -1,0 +1,10 @@
+## Pages
+- [- Chalo College](/collegedetail): No description available
+- [- Chalo College Blog](/blogdetail): No description available
+- [About Us - Chalo College](/about): Learn about Chalo College
+- [Chalo College - Find Your Perfect College](/home): Find your perfect college with Chalo College. Search colleges, get admission consulting, course counseling, and expert guidance for your educational journey.
+- [College Listings - Chalo College](/collegelistings): Browse and compare top colleges. Filter by course, state and more.
+- [Education Blog - Career & Admission Tips | Chalo College](/blog): Read latest articles about college admissions, entrance exams, career guidance, and student life.
+- [Find Best PG & Hostels | Chalo College](/pglistings): Browse top rated PGs and Hostels near colleges. Affordable student accommodation with verified amenities.
+- [Mentorship Program - Chalo College](/mentorship): Get personal mentorship from industry experts and college seniors. Guide your career path with Chalo College.
+- [Our Services - Chalo College](/services): Explore Chalo College
