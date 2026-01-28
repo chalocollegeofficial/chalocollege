@@ -49,7 +49,7 @@ const HomePage = () => {
         />
 
         {/* 🔥 Preload Hero Image for LCP */}
-        <link rel="preload" as="image" href="/images/hero.webp" />
+        <link rel="preload" as="image" href="/hero.webp" />
       </Helmet>
 
       <div className="bg-gradient-to-b from-blue-50 to-white">

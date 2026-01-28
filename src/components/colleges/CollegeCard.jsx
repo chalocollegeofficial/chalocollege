@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import LeadPopup from '@/components/LeadPopup';
 import ImageGallery from '@/components/common/ImageGallery';
 import { useSubmissionLock } from '@/utils/useSubmissionLock';
+import { createCollegeSlug } from '@/utils/slug';
 
 const CollegeCard = ({ college }) => {
   const navigate = useNavigate();
@@ -16,13 +17,11 @@ const CollegeCard = ({ college }) => {
     const s = String(value).trim();
     if (!s) return 'N/A';
 
-    // Normalize some common variants
     const lowered = s.toLowerCase();
     if (['gov', 'govt', 'government'].includes(lowered)) return 'Government';
     if (['semi-gov', 'semi govt', 'semi government', 'semi-government'].includes(lowered)) return 'Semi-Government';
     if (['pvt', 'private'].includes(lowered)) return 'Private';
 
-    // Title case fallback
     return s
       .split(/\s+/)
       .map((w) => (w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w))
@@ -30,9 +29,14 @@ const CollegeCard = ({ college }) => {
   };
 
   const handleViewDetails = () => {
-    const legacyFlag = localStorage.getItem('leadSubmitted') === 'true' || sessionStorage.getItem('leadSubmitted') === 'true';
+    const legacyFlag =
+      localStorage.getItem('leadSubmitted') === 'true' ||
+      sessionStorage.getItem('leadSubmitted') === 'true';
+
+    const collegeSlug = createCollegeSlug(college);
+
     if (hasSubmitted || legacyFlag) {
-      navigate(`/colleges/${college.id}`);
+      navigate(`/colleges/${collegeSlug}`);
     } else {
       setShowLeadPopup(true);
     }
@@ -64,7 +68,6 @@ const CollegeCard = ({ college }) => {
                 </div>
               </div>
 
-              {/* ✅ Ranking badge stays (only once) */}
               <div className="flex flex-col items-end gap-2">
                 <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-lg">
                   <Star className="h-4 w-4 text-yellow-600 mr-1 fill-current" />
@@ -73,7 +76,6 @@ const CollegeCard = ({ college }) => {
               </div>
             </div>
 
-            {/* ✅ Here: Ranking tile replaced with Category */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               <div className="flex items-center text-gray-600">
                 <Building2 className="h-4 w-4 mr-2 text-blue-600" />
@@ -155,7 +157,7 @@ const CollegeCard = ({ college }) => {
         onClose={() => setShowLeadPopup(false)}
         source="college_card_click"
         targetCollege={college.college_name}
-        onSuccess={() => navigate(`/colleges/${college.id}`)}
+        onSuccess={() => navigate(`/colleges/${createCollegeSlug(college)}`)}
       />
     </>
   );

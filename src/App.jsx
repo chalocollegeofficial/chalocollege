@@ -13,6 +13,8 @@ import AboutPage from '@/pages/AboutPage';
 import ServicesPage from '@/pages/ServicesPage';
 import CollegeListingsPage from '@/pages/CollegeListingsPage';
 import CollegeDetailPage from '@/pages/CollegeDetailPage';
+import CollegeCoursesPage from '@/pages/CollegeCoursesPage';
+import CollegeCourseDetailPage from '@/pages/CollegeCourseDetailPage';
 import ContactPage from '@/pages/ContactPage';
 import BlogPage from '@/pages/BlogPage';
 import BlogDetailPage from '@/pages/BlogDetailPage';
@@ -53,11 +55,11 @@ function App() {
           <title>Aao College - Find Your Perfect College</title>
           <meta name="description" content="AaoCollege.com par aapko milti hai complete college admission guidance – course selection se lekar form fill, counselling aur final admission tak full support." />
         </Helmet>
-        
+
         <Routes>
           {/* Admin Routes - Login is PUBLIC */}
           <Route path="/admin/login" element={<AdminLogin />} />
-          
+
           {/* Protected Admin Section */}
           <Route path="/admin" element={
             <ProtectedAdminRoute>
@@ -66,10 +68,10 @@ function App() {
           }>
             {/* Redirect /admin to /admin/dashboard */}
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
-            
+
             {/* Actual Dashboard Route */}
             <Route path="dashboard" element={<AdminDashboard />} />
-            
+
             <Route path="leads" element={<AdminLeads />} />
             <Route path="unified-leads" element={<AdminUnifiedLeads />} />
             <Route path="blogs" element={<AdminBlogs />} />
@@ -89,7 +91,12 @@ function App() {
                 <Route path="/services" element={<ServicesPage />} />
                 <Route path="/mentorship" element={<MentorshipPage />} />
                 <Route path="/colleges" element={<CollegeListingsPage />} />
-                <Route path="/colleges/:id" element={<CollegeDetailPage />} />
+
+                {/* ✅ SEO-friendly College + Course URLs */}
+                <Route path="/colleges/:collegeSlug/courses/:courseSlug" element={<CollegeCourseDetailPage />} />
+                <Route path="/colleges/:collegeSlug/courses" element={<CollegeCoursesPage />} />
+                <Route path="/colleges/:collegeSlug" element={<CollegeDetailPage />} />
+
                 <Route path="/get-pg" element={<PGListingsPage />} />
                 <Route path="/register-pg" element={<PGRegisterPage />} />
                 <Route path="/contact" element={<ContactPage />} />
@@ -99,7 +106,7 @@ function App() {
             </MainLayout>
           } />
         </Routes>
-        
+
         <Toaster />
       </Router>
     </AuthProvider>

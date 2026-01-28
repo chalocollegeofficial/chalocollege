@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   MapPin,
@@ -17,6 +17,7 @@ import {
   Loader2,
   Lock,
   Download,
+  ExternalLink,
   ChevronDown,
 } from 'lucide-react';
 
@@ -27,11 +28,15 @@ import { useToast } from '@/components/ui/use-toast';
 import { validateName, validateEmail, validateLinkedInUrl } from '@/utils/validation';
 import ImageGallery from '@/components/common/ImageGallery';
 import SafeHtml from '@/components/common/SafeHtml';
+import { createCollegeSlug, createCourseSlug, extractCollegeIdFromSlug } from '@/utils/slug';
 
 const CollegeDetailPage = () => {
-  const { id } = useParams();
+  const { collegeSlug } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Supports both legacy UUID URLs and new SEO slugs like: "college-name-<uuid>"
+  const collegeId = useMemo(() => extractCollegeIdFromSlug(collegeSlug), [collegeSlug]);
 
   const [collegeData, setCollegeData] = useState(null);
   const [reviews, setReviews] = useState([]);
@@ -141,7 +146,7 @@ const CollegeDetailPage = () => {
     const { data, error } = await supabase
       .from('college_reviews')
       .select('*')
-      .eq('college_id', id)
+      .eq('college_id', collegeId)
       .eq('status', 'APPROVED')
       .order('created_at', { ascending: false });
 
@@ -152,7 +157,7 @@ const CollegeDetailPage = () => {
   useEffect(() => {
     const fetchCollege = async () => {
       try {
-        const { data, error } = await supabase.from('colleges').select('*').eq('id', id).single();
+        const { data, error } = await supabase.from('colleges').select('*').eq('id', collegeId).single();
         if (error) throw error;
 
         // ✅ Fix: images are stored as TEXT JSON string from admin (JSON.stringify(array))
@@ -180,12 +185,12 @@ const CollegeDetailPage = () => {
       }
     };
 
-    if (id) {
+    if (collegeId) {
       fetchCollege();
       fetchReviews();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [collegeId]);
 
   const handleReviewFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -226,7 +231,7 @@ const CollegeDetailPage = () => {
     try {
       // 1. Upload ID Card
       const fileExt = reviewForm.idCard.name.split('.').pop();
-      const fileName = `${id}/${Math.random()}.${fileExt}`;
+      const fileName = `${collegeId}/${Math.random()}.${fileExt}`;
       const filePath = `verification/${fileName}`;
 
       const { error: uploadError } = await supabase.storage.from('secure-documents').upload(filePath, reviewForm.idCard);
@@ -238,7 +243,7 @@ const CollegeDetailPage = () => {
       // 2. Insert Review
       const { error: insertError } = await supabase.from('college_reviews').insert([
         {
-          college_id: id,
+          college_id: collegeId,
           student_name: reviewForm.name,
           email: reviewForm.email,
           linkedin_url: reviewForm.linkedin,
@@ -285,7 +290,8 @@ const CollegeDetailPage = () => {
   const courseCategories = useMemo(
     () =>
       parseCourseCategories(collegeData?.courses)
-        .map((c) => ({
+        .map((c, idx) => ({
+          __index: idx,
           name: c?.name || '',
           level: c?.level || 'UG',
           brochure_url: c?.brochure_url || '',
@@ -298,6 +304,29 @@ const CollegeDetailPage = () => {
     () => courseCategories.filter((c) => (c.level || 'UG') === courseLevelFilter),
     [courseCategories, courseLevelFilter]
   );
+
+  const collegeCanonicalSlug = useMemo(() => {
+    if (collegeData?.id) return createCollegeSlug(collegeData);
+    return collegeSlug;
+  }, [collegeData, collegeSlug]);
+
+  const canonicalUrl = useMemo(() => {
+    if (typeof window === 'undefined') return `/colleges/${collegeCanonicalSlug}`;
+    const origin = window.location.origin || '';
+    return origin ? `${origin}/colleges/${collegeCanonicalSlug}` : `/colleges/${collegeCanonicalSlug}`;
+  }, [collegeCanonicalSlug]);
+
+  const topCourseLinks = useMemo(() => {
+    const items = courseCategories.slice(0, 6);
+    return items.map((c) => {
+      const slug = createCourseSlug(c, c.__index);
+      return {
+        name: c.name,
+        level: String(c.level || 'UG').toUpperCase(),
+        url: `/colleges/${collegeCanonicalSlug}/courses/${slug}`,
+      };
+    });
+  }, [courseCategories, collegeCanonicalSlug]);
 
   // Avoid showing duplicate long description when it's same as brief
   const hasDescription =
@@ -323,11 +352,14 @@ const CollegeDetailPage = () => {
   return (
     <>
       <Helmet>
-        <title>{collegeData.college_name} - Aao College</title>
+        <title>
+          {`${collegeData.college_name}${collegeData.city ? `, ${collegeData.city}` : ''} - Courses, Fees, Placements | Aao College`}
+        </title>
         <meta
           name="description"
-          content={`Learn about ${collegeData.college_name}. Get details on courses, fees, placements, facilities, and admission process.`}
+          content={`Learn about ${collegeData.college_name}${collegeData.city ? ` in ${collegeData.city}` : ''}. Get details on courses, fees, placements, facilities, and admission process.`}
         />
+        <link rel="canonical" href={canonicalUrl} />
       </Helmet>
 
       <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen pb-12">
@@ -438,6 +470,41 @@ const CollegeDetailPage = () => {
               </div>
             </motion.div>
 
+            {/* SEO: Dedicated course URLs + strong internal links */}
+            <div className="bg-white rounded-2xl shadow-xl p-6 mb-8">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <div>
+                  <h2 className="text-xl md:text-2xl font-bold text-gray-900">Courses & Fees</h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    View all courses in a dedicated page (best for SEO & sharing).
+                  </p>
+                </div>
+
+                <Link to={`/colleges/${collegeCanonicalSlug}/courses`}>
+                  <Button className="bg-blue-600 hover:bg-blue-700">View all courses</Button>
+                </Link>
+              </div>
+
+              {topCourseLinks.length > 0 ? (
+                <div className="mt-4">
+                  <p className="text-sm font-semibold text-gray-900 mb-2">Top courses</p>
+                  <div className="flex flex-wrap gap-2">
+                    {topCourseLinks.map((c) => (
+                      <Link
+                        key={c.url}
+                        to={c.url}
+                        className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-100 px-3 py-1.5 rounded-full text-sm font-medium hover:bg-blue-100 transition-colors"
+                        title={`Open ${c.name} (${c.level})`}
+                      >
+                        <span>{c.name}</span>
+                        <span className="text-xs text-blue-600/80">{c.level}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
             <Tabs defaultValue="overview" className="bg-white rounded-2xl shadow-xl p-6">
               <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -450,7 +517,7 @@ const CollegeDetailPage = () => {
               <TabsContent value="overview" className="mt-6">
                 <div className="space-y-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-4">About the College</h3>
-                
+
                   {hasDescription && (
                     <div className="prose prose-slate max-w-none text-gray-700">
                       <SafeHtml html={collegeData.description} />
@@ -460,7 +527,7 @@ const CollegeDetailPage = () => {
               </TabsContent>
 
               <TabsContent value="courses" className="mt-6">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
                   <div className="flex items-center gap-3">
                     <div className="flex gap-2 bg-slate-100 p-1.5 rounded-xl shadow-inner">
                       <button
@@ -490,7 +557,16 @@ const CollegeDetailPage = () => {
                       {courseLevelFilter === 'UG' ? 'Undergraduate' : 'Postgraduate'}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 font-medium">Click a category to expand details</p>
+                  <div className="flex items-center gap-3">
+                    <p className="text-xs text-slate-500 font-medium">Click a category to expand details</p>
+                    <Link
+                      to={`/colleges/${collegeCanonicalSlug}/courses`}
+                      className="text-xs text-blue-700 hover:text-blue-900 underline font-semibold"
+                      title="Open all courses & fees"
+                    >
+                      View all courses page
+                    </Link>
+                  </div>
                 </div>
 
                 {filteredCourses.length === 0 ? (
@@ -529,16 +605,30 @@ const CollegeDetailPage = () => {
                             />
                           </button>
 
-                          {course.brochure_url && (
-                            <a
-                              href={course.brochure_url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-xs text-blue-700 underline inline-block mt-2"
+                          <div className="flex items-center gap-3 mt-2">
+                            <Link
+                              to={`/colleges/${collegeCanonicalSlug}/courses/${createCourseSlug(course, course.__index)}`}
+                              className="text-xs text-blue-700 underline inline-flex items-center"
+                              title="Open course details page"
+                              onClick={(e) => e.stopPropagation()}
                             >
-                              View Brochure
-                            </a>
-                          )}
+                              <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                              Course details
+                            </Link>
+
+                            {course.brochure_url && (
+                              <a
+                                href={course.brochure_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-xs text-slate-700 hover:text-slate-900 underline inline-flex items-center"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Download className="h-3.5 w-3.5 mr-1" />
+                                Brochure
+                              </a>
+                            )}
+                          </div>
 
                           <div
                             className={`mt-5 overflow-hidden transition-all duration-300 ${
@@ -737,7 +827,9 @@ const CollegeDetailPage = () => {
                         <div className="flex items-center mt-1 text-xs text-gray-500">
                           <Lock className="w-3 h-3 mr-1" /> Your ID is securely stored and only visible to admins.
                         </div>
-                        {reviewErrors.idCard && <span className="text-xs text-red-500 block mt-1">{reviewErrors.idCard}</span>}
+                        {reviewErrors.idCard && (
+                          <span className="text-xs text-red-500 block mt-1">{reviewErrors.idCard}</span>
+                        )}
                       </div>
 
                       <div>
@@ -750,7 +842,11 @@ const CollegeDetailPage = () => {
                               onClick={() => setReviewForm({ ...reviewForm, rating: star })}
                               className="focus:outline-none transition-transform hover:scale-110"
                             >
-                              <Star className={`w-8 h-8 ${star <= reviewForm.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} />
+                              <Star
+                                className={`w-8 h-8 ${
+                                  star <= reviewForm.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'
+                                }`}
+                              />
                             </button>
                           ))}
                         </div>
@@ -771,8 +867,16 @@ const CollegeDetailPage = () => {
                         {reviewErrors.review && <span className="text-xs text-red-500">{reviewErrors.review}</span>}
                       </div>
 
-                      <Button type="submit" disabled={isReviewSubmitting} className="w-full bg-blue-600 hover:bg-blue-700 h-11 text-base">
-                        {isReviewSubmitting ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Send className="w-5 h-5 mr-2" />}
+                      <Button
+                        type="submit"
+                        disabled={isReviewSubmitting}
+                        className="w-full bg-blue-600 hover:bg-blue-700 h-11 text-base"
+                      >
+                        {isReviewSubmitting ? (
+                          <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                        ) : (
+                          <Send className="w-5 h-5 mr-2" />
+                        )}
                         Submit for Verification
                       </Button>
                     </form>

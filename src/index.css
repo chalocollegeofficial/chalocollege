@@ -112,6 +112,18 @@ body {
   animation-timing-function: linear;
   animation-iteration-count: infinite;
   will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Performance helpers for continuously animated cards */
+.success-story-card {
+  /* isolate paint work during marquee movement */
+  contain: paint;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* Pause on hover */
