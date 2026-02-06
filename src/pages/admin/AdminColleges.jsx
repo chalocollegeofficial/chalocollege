@@ -42,7 +42,8 @@ const AdminColleges = () => {
     images: [],
     video_url: '',
     facilities: '',
-    placements: '',
+    // ✅ FIX: Placements no longer as raw JSON string input
+    placements: { average: '', highest: '' },
     // brochure_url moved to course categories
 
     // Course categories with specializations
@@ -252,17 +253,32 @@ const AdminColleges = () => {
     setIsSubmitting(true);
 
     try {
-      // Validate Placements JSON
+      // ✅ FIX: Placements now comes from simple fields (average/highest) and is saved as JSON object
       let placementsJson = {};
-      try {
-        if (formData.placements && typeof formData.placements === 'string' && formData.placements.trim() !== '') {
+
+      // Backward-safe: if something somehow is still string, try parse; otherwise use object
+      if (formData.placements && typeof formData.placements === 'object') {
+        placementsJson = formData.placements;
+      } else if (formData.placements && typeof formData.placements === 'string' && formData.placements.trim() !== '') {
+        try {
           placementsJson = JSON.parse(formData.placements);
-        } else if (typeof formData.placements === 'object') {
-          placementsJson = formData.placements;
+        } catch (e) {
+          placementsJson = {};
         }
-      } catch (jsonError) {
-        throw new Error("Invalid JSON format in Placements field");
       }
+
+      // Ensure only desired keys exist (average/highest) while keeping any existing keys if already there
+      const avg = (placementsJson?.average ?? '').toString().trim();
+      const high = (placementsJson?.highest ?? '').toString().trim();
+      placementsJson = {
+        ...placementsJson,
+        average: avg,
+        highest: high,
+      };
+
+      // Remove empty keys to avoid storing junk
+      if (!placementsJson.average) delete placementsJson.average;
+      if (!placementsJson.highest) delete placementsJson.highest;
 
       const cleanedCourses = (formData.courses || [])
         .map((c) => {
@@ -366,11 +382,21 @@ const AdminColleges = () => {
       }
     }
 
-    let placementsString = '';
+    // ✅ FIX: Placements now mapped to simple fields
+    let placementsObj = { average: '', highest: '' };
     if (college.placements) {
-      placementsString = typeof college.placements === 'string'
-        ? college.placements
-        : JSON.stringify(college.placements, null, 2);
+      if (typeof college.placements === 'object') {
+        placementsObj = { ...placementsObj, ...college.placements };
+      } else if (typeof college.placements === 'string') {
+        try {
+          const parsed = JSON.parse(college.placements);
+          if (parsed && typeof parsed === 'object') {
+            placementsObj = { ...placementsObj, ...parsed };
+          }
+        } catch (e) {
+          // ignore invalid
+        }
+      }
     }
 
     let courses = [];
@@ -418,7 +444,7 @@ const AdminColleges = () => {
       images: parsedImages,
       video_url: college.video_url || '',
       facilities: Array.isArray(college.facilities) ? college.facilities.join(', ') : (college.facilities || ''),
-      placements: placementsString,
+      placements: placementsObj,
 
       courses,
     });
@@ -762,15 +788,41 @@ const AdminColleges = () => {
                   />
                 </div>
 
+                {/* ✅ FIX: Replace JSON textarea with two simple inputs */}
                 <div>
-                  <label className="block text-sm font-medium mb-1">Placements (JSON)</label>
-                  <textarea
-                    rows={4}
-                    className="w-full p-2 border rounded font-mono text-sm"
-                    value={formData.placements}
-                    onChange={e => setFormData({ ...formData, placements: e.target.value })}
-                    placeholder={'{\n "average": "10 LPA",\n "highest": "50 LPA"\n}'}
-                  />
+                  <label className="block text-sm font-medium mb-1">Placements</label>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium mb-1">Average Package</label>
+                      <input
+                        className="w-full p-2 border rounded"
+                        value={formData.placements?.average || ''}
+                        onChange={e =>
+                          setFormData({
+                            ...formData,
+                            placements: { ...(formData.placements || {}), average: e.target.value }
+                          })
+                        }
+                        placeholder="e.g. 10 LPA"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium mb-1">Highest Package</label>
+                      <input
+                        className="w-full p-2 border rounded"
+                        value={formData.placements?.highest || ''}
+                        onChange={e =>
+                          setFormData({
+                            ...formData,
+                            placements: { ...(formData.placements || {}), highest: e.target.value }
+                          })
+                        }
+                        placeholder="e.g. 50 LPA"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <Button type="submit" disabled={isSubmitting} className="w-full">
