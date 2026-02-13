@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/customSupabaseClient';
 import { Button } from '@/components/ui/button';
 import { Loader2, Plus, Trash2, Edit2, Upload, X, PlayCircle } from 'lucide-react';
@@ -21,6 +21,22 @@ const AdminColleges = () => {
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [uploading, setUploading] = useState(false);
+
+  // ✅ Preserve scroll position when opening/closing the dialog from deep in the list.
+  // Root cause: DialogTrigger is bound to the "Add College" button at the top.
+  // When we programmatically open the dialog for Edit, Radix restores focus to that trigger on close,
+  // which scrolls the page back to the top. We prevent the default auto-focus and restore focus/scroll
+  // to the element the user actually clicked.
+  const lastActiveElementRef = useRef(null);
+  const lastScrollYRef = useRef(0);
+
+  const rememberScrollAndActiveElement = (el) => {
+    // Store current scroll so we can restore it after closing the dialog.
+    if (typeof window !== 'undefined') {
+      lastScrollYRef.current = window.scrollY || 0;
+    }
+    lastActiveElementRef.current = el || (typeof document !== 'undefined' ? document.activeElement : null);
+  };
 
   // ✅ NEW: Search
   const [searchTerm, setSearchTerm] = useState('');
@@ -369,7 +385,8 @@ const AdminColleges = () => {
     }
   };
 
-  const handleEdit = (college) => {
+  const handleEdit = (college, triggerEl) => {
+    rememberScrollAndActiveElement(triggerEl);
     let parsedImages = [];
     if (Array.isArray(college.images)) {
       parsedImages = college.images;
@@ -487,10 +504,47 @@ const AdminColleges = () => {
 
           <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>
-              <Button><Plus className="mr-2 h-4 w-4" /> Add College</Button>
+              <Button
+                onClick={(e) => {
+                  rememberScrollAndActiveElement(e.currentTarget);
+                  // Ensure we start with a clean form when adding a new college.
+                  if (editingId) resetForm();
+                }}
+              >
+                <Plus className="mr-2 h-4 w-4" /> Add College
+              </Button>
             </DialogTrigger>
 
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
+            <DialogContent
+              className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white"
+              onCloseAutoFocus={(e) => {
+                // Prevent Radix from returning focus to the DialogTrigger (Add College at top),
+                // which scrolls the page to the top. We'll restore focus/scroll ourselves.
+                e.preventDefault();
+
+                if (typeof window === 'undefined') return;
+
+                const y = lastScrollYRef.current || 0;
+                const el = lastActiveElementRef.current;
+
+                requestAnimationFrame(() => {
+                  // Restore scroll first...
+                  window.scrollTo(0, y);
+
+                  // ...then restore focus without scrolling (supported in modern browsers).
+                  if (el && typeof el.focus === 'function') {
+                    try {
+                      el.focus({ preventScroll: true });
+                    } catch {
+                      el.focus();
+                    }
+                  }
+
+                  // Double-ensure scroll is preserved even if focus fallback scrolls.
+                  window.scrollTo(0, y);
+                });
+              }}
+            >
               <DialogHeader>
                 <DialogTitle>{editingId ? 'Edit College' : 'Add New College'}</DialogTitle>
               </DialogHeader>
@@ -704,15 +758,15 @@ const AdminColleges = () => {
                           </div>
                           <div>
                             <label className="block text-xs font-medium mb-1">Upload Brochure (PDF)</label>
-                          <div className="flex gap-2 items-center">
-                            <input
-                              type="file"
-                              accept="application/pdf"
-                              onChange={(e) => handleBrochureUpload(e, idx)}
-                              className="block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                            />
-                            {uploading && <Loader2 className="h-4 w-4 animate-spin text-blue-600" />}
-                          </div>
+                            <div className="flex gap-2 items-center">
+                              <input
+                                type="file"
+                                accept="application/pdf"
+                                onChange={(e) => handleBrochureUpload(e, idx)}
+                                className="block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                              />
+                              {uploading && <Loader2 className="h-4 w-4 animate-spin text-blue-600" />}
+                            </div>
                           </div>
                           {c.brochure_url && <p className="text-xs text-green-600 mt-1">Brochure saved.</p>}
                         </div>
@@ -848,7 +902,12 @@ const AdminColleges = () => {
         </div>
       </div>
 
-      {loading ? (
+      {/*
+        IMPORTANT UX FIX:
+        - We keep the list rendered while refetching so the page doesn't "jump" (scroll gets clamped when content disappears).
+        - For the initial load (no data yet), we show a centered loader.
+      */}
+      {loading && colleges.length === 0 ? (
         <div className="flex justify-center p-10"><Loader2 className="animate-spin" /></div>
       ) : (
         <>
@@ -862,77 +921,88 @@ const AdminColleges = () => {
                 const courseCategories = getCollegeCourses(college);
                 return (
                   <div key={college.id} className="bg-white p-4 rounded-lg shadow flex justify-between items-center">
-                  <div>
-                    <h3 className="font-bold text-lg">{college.college_name}</h3>
-                    <p className="text-sm text-gray-500">
-                      {college.city}{college.state ? `, ${college.state}` : ''} • {college.fee_range}
-                    </p>
-                    {college.brief_description && (
-                      <p className="text-xs text-gray-500 mt-1 line-clamp-2">{college.brief_description}</p>
-                    )}
-                    {college.category && <p className="text-xs text-gray-400 mt-1">Category: {college.category}</p>}
-                    {college.affiliation && <p className="text-xs text-gray-400 mt-1">Affiliation: {college.affiliation}</p>}
-                    {college.video_url && (
-                      <span className="text-xs text-blue-600 flex items-center mt-1">
-                        <PlayCircle className="w-3 h-3 mr-1" /> Video Link Active
-                      </span>
-                    )}
-                    {courseCategories.length > 0 && (
-                      <div className="mt-2">
-                        <p className="text-xs font-semibold text-gray-600">Courses</p>
-                        <ol className="text-xs text-gray-600 space-y-1 mt-1">
-                          {courseCategories.map((course, idx) => {
-                            const label = `${idx + 1}.`;
-                            const hasSubs = Array.isArray(course?.subcategories) && course.subcategories.length > 0;
-                            return (
-                              <li key={`${course?.name || 'course'}-${idx}`}>
-                                <span className="font-semibold">{label}</span>{' '}
-                                {course?.name || 'Course'}{course?.level ? ` (${course.level})` : ''}
-                                {hasSubs && (
-                                  <ol className="ml-4 mt-1 space-y-1">
-                                    {course.subcategories.map((sub, subIdx) => {
-                                      const subLabel = `${idx + 1}.${subIdx + 1}`;
-                                      const subFeeText = sub?.fee ? ` - ${sub.fee}` : '';
-                                      const subDurationText = sub?.duration ? ` (${sub.duration})` : '';
-                                      return (
-                                        <li key={`${sub?.name || 'sub'}-${idx}-${subIdx}`}>
-                                          <span className="font-semibold">{subLabel}</span>{' '}
-                                          {sub?.name || 'Specialization'}{subDurationText}{subFeeText}
-                                        </li>
-                                      );
-                                    })}
-                                  </ol>
-                                )}
-                              </li>
-                            );
-                          })}
-                        </ol>
-                      </div>
-                    )}
-                  </div>
+                    <div>
+                      <h3 className="font-bold text-lg">{college.college_name}</h3>
+                      <p className="text-sm text-gray-500">
+                        {college.city}{college.state ? `, ${college.state}` : ''} • {college.fee_range}
+                      </p>
+                      {college.brief_description && (
+                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">{college.brief_description}</p>
+                      )}
+                      {college.category && <p className="text-xs text-gray-400 mt-1">Category: {college.category}</p>}
+                      {college.affiliation && <p className="text-xs text-gray-400 mt-1">Affiliation: {college.affiliation}</p>}
+                      {college.video_url && (
+                        <span className="text-xs text-blue-600 flex items-center mt-1">
+                          <PlayCircle className="w-3 h-3 mr-1" /> Video Link Active
+                        </span>
+                      )}
+                      {courseCategories.length > 0 && (
+                        <div className="mt-2">
+                          <p className="text-xs font-semibold text-gray-600">Courses</p>
+                          <ol className="text-xs text-gray-600 space-y-1 mt-1">
+                            {courseCategories.map((course, idx) => {
+                              const label = `${idx + 1}.`;
+                              const hasSubs = Array.isArray(course?.subcategories) && course.subcategories.length > 0;
+                              return (
+                                <li key={`${course?.name || 'course'}-${idx}`}>
+                                  <span className="font-semibold">{label}</span>{' '}
+                                  {course?.name || 'Course'}{course?.level ? ` (${course.level})` : ''}
+                                  {hasSubs && (
+                                    <ol className="ml-4 mt-1 space-y-1">
+                                      {course.subcategories.map((sub, subIdx) => {
+                                        const subLabel = `${idx + 1}.${subIdx + 1}`;
+                                        const subFeeText = sub?.fee ? ` - ${sub.fee}` : '';
+                                        const subDurationText = sub?.duration ? ` (${sub.duration})` : '';
+                                        return (
+                                          <li key={`${sub?.name || 'sub'}-${idx}-${subIdx}`}>
+                                            <span className="font-semibold">{subLabel}</span>{' '}
+                                            {sub?.name || 'Specialization'}{subDurationText}{subFeeText}
+                                          </li>
+                                        );
+                                      })}
+                                    </ol>
+                                  )}
+                                </li>
+                              );
+                            })}
+                          </ol>
+                        </div>
+                      )}
+                    </div>
 
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(college)}>
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-
-                    {deleteConfirmId === college.id ? (
-                      <div className="flex gap-2">
-                        <Button variant="destructive" size="sm" onClick={() => handleDelete(college.id)}>Confirm</Button>
-                        <Button variant="outline" size="sm" onClick={() => setDeleteConfirmId(null)}>Cancel</Button>
-                      </div>
-                    ) : (
-                      <Button variant="destructive" size="sm" onClick={() => setDeleteConfirmId(college.id)}>
-                        <Trash2 className="h-4 w-4" />
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => handleEdit(college, e.currentTarget)}
+                      >
+                        <Edit2 className="h-4 w-4" />
                       </Button>
-                    )}
-                  </div>
+
+                      {deleteConfirmId === college.id ? (
+                        <div className="flex gap-2">
+                          <Button variant="destructive" size="sm" onClick={() => handleDelete(college.id)}>Confirm</Button>
+                          <Button variant="outline" size="sm" onClick={() => setDeleteConfirmId(null)}>Cancel</Button>
+                        </div>
+                      ) : (
+                        <Button variant="destructive" size="sm" onClick={() => setDeleteConfirmId(college.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 );
               })}
             </div>
           )}
         </>
+      )}
+
+      {/* Small non-jumpy indicator when we refetch while list is already on screen */}
+      {loading && colleges.length > 0 && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm text-gray-600 shadow">
+          <Loader2 className="h-4 w-4 animate-spin" /> Updating list...
+        </div>
       )}
     </div>
   );
