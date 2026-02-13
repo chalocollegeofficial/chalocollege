@@ -35,6 +35,17 @@ const CollegeDetailPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // ✅ Go back to the previous page when possible (preserves filters + scroll position)
+  // Falls back to /colleges if this page was opened directly.
+  const handleBackToColleges = () => {
+    const idx = typeof window !== 'undefined' ? window.history?.state?.idx : null;
+    if (typeof idx === 'number' && idx > 0) {
+      navigate(-1);
+    } else {
+      navigate('/colleges');
+    }
+  };
+
   // Supports both legacy UUID URLs and new SEO slugs like: "college-name-<uuid>"
   const collegeId = useMemo(() => extractCollegeIdFromSlug(collegeSlug), [collegeSlug]);
 
@@ -267,7 +278,11 @@ const CollegeDetailPage = () => {
       setReviewErrors({});
     } catch (error) {
       console.error(error);
-      toast({ title: 'Submission Failed', description: 'Could not submit review. Try again later.', variant: 'destructive' });
+      toast({
+        title: 'Submission Failed',
+        description: 'Could not submit review. Try again later.',
+        variant: 'destructive',
+      });
     } finally {
       setIsReviewSubmitting(false);
     }
@@ -345,7 +360,7 @@ const CollegeDetailPage = () => {
     return (
       <div className="h-screen flex flex-col items-center justify-center p-4">
         <h2 className="text-2xl font-bold mb-4">College Not Found</h2>
-        <Button onClick={() => navigate('/colleges')}>Back to Listings</Button>
+        <Button onClick={handleBackToColleges}>Back to Listings</Button>
       </div>
     );
 
@@ -365,7 +380,7 @@ const CollegeDetailPage = () => {
       <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen pb-12">
         <section className="py-8">
           <div className="container mx-auto px-4">
-            <Button onClick={() => navigate('/colleges')} variant="outline" className="mb-6">
+            <Button onClick={handleBackToColleges} variant="outline" className="mb-6">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Colleges
             </Button>
