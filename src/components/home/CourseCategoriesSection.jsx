@@ -39,6 +39,14 @@ const CARD_STYLES = {
   design: 'bg-red-100 text-red-600',
 };
 
+const normalizeCourseKey = (value) =>
+  String(value || '')
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
 const CourseCategoriesSection = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -86,8 +94,8 @@ const CourseCategoriesSection = () => {
       for (const c of matchedColleges) {
         const matches = getMatchingCoursesForCategory(c, cat.key);
         for (const courseName of matches) {
-          const clean = String(courseName || '').trim();
-          if (clean) uniqueCourses.add(clean);
+          const key = normalizeCourseKey(courseName);
+          if (key) uniqueCourses.add(key);
         }
       }
 

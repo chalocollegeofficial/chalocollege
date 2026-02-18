@@ -6,6 +6,11 @@ import { ArrowLeft, BookOpen, Download, ExternalLink, Loader2 } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/customSupabaseClient';
 import { createCollegeSlug, createCourseSlug, extractCollegeIdFromSlug, parseCourseSlug } from '@/utils/slug';
+import {
+  DEFAULT_COURSE_LEVEL,
+  getCourseLevelShortLabel,
+  normalizeCourseLevel,
+} from '@/lib/courseLevels';
 
 const parseCourseCategories = (raw) => {
   if (!raw) return [];
@@ -63,7 +68,7 @@ const CollegeCourseDetailPage = () => {
       .map((c, idx) => ({
         __index: idx,
         name: c?.name || '',
-        level: c?.level || 'UG',
+        level: normalizeCourseLevel(c?.level || DEFAULT_COURSE_LEVEL),
         brochure_url: c?.brochure_url || '',
         subcategories: Array.isArray(c?.subcategories) ? c.subcategories : [],
       }))
@@ -203,7 +208,7 @@ const CollegeCourseDetailPage = () => {
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
                   {selectedCourse.name}{' '}
                   <span className="text-gray-500 font-semibold">
-                    ({String(selectedCourse.level || 'UG').toUpperCase()})
+                    ({getCourseLevelShortLabel(selectedCourse.level || DEFAULT_COURSE_LEVEL)})
                   </span>
                 </h1>
 

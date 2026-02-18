@@ -29,6 +29,14 @@ import { validateName, validateEmail, validateLinkedInUrl } from '@/utils/valida
 import ImageGallery from '@/components/common/ImageGallery';
 import SafeHtml from '@/components/common/SafeHtml';
 import { createCollegeSlug, createCourseSlug, extractCollegeIdFromSlug } from '@/utils/slug';
+import {
+  DEFAULT_COURSE_LEVEL,
+  getCourseLevelFilterLabel,
+  getCourseLevelOrder,
+  getCourseLevelShortLabel,
+  normalizeCourseLevel,
+  sortCourseLevels,
+} from '@/lib/courseLevels';
 
 const CollegeDetailPage = () => {
   const { collegeSlug } = useParams();
@@ -53,7 +61,7 @@ const CollegeDetailPage = () => {
   const [reviews, setReviews] = useState([]);
   const [isReviewSubmitting, setIsReviewSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [courseLevelFilter, setCourseLevelFilter] = useState('UG');
+  const [courseLevelFilter, setCourseLevelFilter] = useState(DEFAULT_COURSE_LEVEL);
   const [expandedCourseKey, setExpandedCourseKey] = useState(null);
 
   // Brochure download state
@@ -308,15 +316,32 @@ const CollegeDetailPage = () => {
         .map((c, idx) => ({
           __index: idx,
           name: c?.name || '',
-          level: c?.level || 'UG',
+          level: normalizeCourseLevel(c?.level || DEFAULT_COURSE_LEVEL),
           brochure_url: c?.brochure_url || '',
           subcategories: Array.isArray(c?.subcategories) ? c.subcategories : [],
         }))
         .filter((c) => c.name),
     [collegeData?.courses]
   );
+
+  const availableCourseLevels = useMemo(() => {
+    const levels = sortCourseLevels(courseCategories.map((c) => c.level));
+    if (levels.length > 0) return levels;
+    return [DEFAULT_COURSE_LEVEL];
+  }, [courseCategories]);
+
+  useEffect(() => {
+    if (availableCourseLevels.includes(courseLevelFilter)) return;
+    setCourseLevelFilter(availableCourseLevels[0] || DEFAULT_COURSE_LEVEL);
+  }, [availableCourseLevels, courseLevelFilter]);
+
   const filteredCourses = useMemo(
-    () => courseCategories.filter((c) => (c.level || 'UG') === courseLevelFilter),
+    () =>
+      courseCategories.filter(
+        (c) =>
+          normalizeCourseLevel(c.level || DEFAULT_COURSE_LEVEL) ===
+          normalizeCourseLevel(courseLevelFilter || DEFAULT_COURSE_LEVEL)
+      ),
     [courseCategories, courseLevelFilter]
   );
 
@@ -337,7 +362,7 @@ const CollegeDetailPage = () => {
       const slug = createCourseSlug(c, c.__index);
       return {
         name: c.name,
-        level: String(c.level || 'UG').toUpperCase(),
+        level: getCourseLevelShortLabel(c.level || DEFAULT_COURSE_LEVEL),
         url: `/colleges/${collegeCanonicalSlug}/courses/${slug}`,
       };
     });
@@ -545,31 +570,27 @@ const CollegeDetailPage = () => {
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
                   <div className="flex items-center gap-3">
                     <div className="flex gap-2 bg-slate-100 p-1.5 rounded-xl shadow-inner">
-                      <button
-                        type="button"
-                        onClick={() => setCourseLevelFilter('UG')}
-                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                          courseLevelFilter === 'UG'
-                            ? 'bg-white text-slate-900 shadow-sm'
-                            : 'text-slate-500 hover:text-slate-800'
-                        }`}
-                      >
-                        UG
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setCourseLevelFilter('PG')}
-                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                          courseLevelFilter === 'PG'
-                            ? 'bg-white text-slate-900 shadow-sm'
-                            : 'text-slate-500 hover:text-slate-800'
-                        }`}
-                      >
-                        PG
-                      </button>
+                      {availableCourseLevels
+                        .slice()
+                        .sort((a, b) => getCourseLevelOrder(a) - getCourseLevelOrder(b))
+                        .map((level) => (
+                          <button
+                            key={level}
+                            type="button"
+                            onClick={() => setCourseLevelFilter(level)}
+                            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                              normalizeCourseLevel(courseLevelFilter) ===
+                              normalizeCourseLevel(level)
+                                ? 'bg-white text-slate-900 shadow-sm'
+                                : 'text-slate-500 hover:text-slate-800'
+                            }`}
+                          >
+                            {getCourseLevelShortLabel(level)}
+                          </button>
+                        ))}
                     </div>
-                    <span className="text-xs text-slate-500 font-medium tracking-wide uppercase">
-                      {courseLevelFilter === 'UG' ? 'Undergraduate' : 'Postgraduate'}
+                    <span className="text-xs text-slate-500 font-medium tracking-wide">
+                      {getCourseLevelFilterLabel(courseLevelFilter)}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">

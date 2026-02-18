@@ -12,6 +12,12 @@ import {
 } from "@/components/ui/dialog";
 
 import RichTextEditor from "@/components/common/RichTextEditor";
+import {
+  COURSE_LEVEL_ADMIN_OPTIONS,
+  DEFAULT_COURSE_LEVEL,
+  getCourseLevelShortLabel,
+  normalizeCourseLevel,
+} from '@/lib/courseLevels';
 
 const AdminColleges = () => {
   const [colleges, setColleges] = useState([]);
@@ -63,7 +69,7 @@ const AdminColleges = () => {
     // brochure_url moved to course categories
 
     // Course categories with specializations
-    courses: [{ name: '', level: 'UG', brochure_url: '', subcategories: [{ name: '', fee: '', duration: '' }] }],
+    courses: [{ name: '', level: DEFAULT_COURSE_LEVEL, brochure_url: '', subcategories: [{ name: '', fee: '', duration: '' }] }],
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -206,7 +212,7 @@ const AdminColleges = () => {
       ...prev,
       courses: [
         ...(prev.courses || []),
-        { name: '', level: 'UG', brochure_url: '', subcategories: [{ name: '', fee: '', duration: '' }] }
+        { name: '', level: DEFAULT_COURSE_LEVEL, brochure_url: '', subcategories: [{ name: '', fee: '', duration: '' }] }
       ]
     }));
   };
@@ -306,10 +312,10 @@ const AdminColleges = () => {
             }))
             .filter((s) => s.name);
 
-          const level = (c.level || 'UG').trim();
+          const level = normalizeCourseLevel(c.level || DEFAULT_COURSE_LEVEL);
           return {
             name: (c.name || '').trim(),
-            level: level || 'UG',
+            level: level || DEFAULT_COURSE_LEVEL,
             brochure_url: (c.brochure_url || '').trim(),
             subcategories,
           };
@@ -431,7 +437,7 @@ const AdminColleges = () => {
       const subcategories = Array.isArray(c?.subcategories) ? c.subcategories : [];
       return {
         name: c?.name || '',
-        level: c?.level || 'UG',
+        level: normalizeCourseLevel(c?.level || DEFAULT_COURSE_LEVEL),
         brochure_url: c?.brochure_url || '',
         subcategories: subcategories.length
           ? subcategories.map((s) => ({
@@ -443,7 +449,7 @@ const AdminColleges = () => {
       };
     });
     if (!courses.length) {
-      courses = [{ name: '', level: 'UG', brochure_url: '', subcategories: [{ name: '', fee: '', duration: '' }] }];
+      courses = [{ name: '', level: DEFAULT_COURSE_LEVEL, brochure_url: '', subcategories: [{ name: '', fee: '', duration: '' }] }];
     }
 
     setFormData({
@@ -485,7 +491,7 @@ const AdminColleges = () => {
 
     return (raw || []).map((c) => ({
       name: c?.name || '',
-      level: c?.level || 'UG',
+      level: normalizeCourseLevel(c?.level || DEFAULT_COURSE_LEVEL),
       brochure_url: c?.brochure_url || '',
       subcategories: Array.isArray(c?.subcategories) ? c.subcategories : []
     })).filter((c) => c.name);
@@ -726,11 +732,14 @@ const AdminColleges = () => {
                           <div className="col-span-3">
                             <select
                               className="w-full p-2 border rounded bg-white"
-                              value={c.level || 'UG'}
+                              value={normalizeCourseLevel(c.level || DEFAULT_COURSE_LEVEL)}
                               onChange={(e) => updateCourseCategoryRow(idx, 'level', e.target.value)}
                             >
-                              <option value="UG">UG (Undergraduate)</option>
-                              <option value="PG">PG (Postgraduate)</option>
+                              {COURSE_LEVEL_ADMIN_OPTIONS.map((levelOption) => (
+                                <option key={levelOption.value} value={levelOption.value}>
+                                  {levelOption.label}
+                                </option>
+                              ))}
                             </select>
                           </div>
                           <div className="col-span-3 flex justify-end">
@@ -946,7 +955,8 @@ const AdminColleges = () => {
                               return (
                                 <li key={`${course?.name || 'course'}-${idx}`}>
                                   <span className="font-semibold">{label}</span>{' '}
-                                  {course?.name || 'Course'}{course?.level ? ` (${course.level})` : ''}
+                                  {course?.name || 'Course'}
+                                  {course?.level ? ` (${getCourseLevelShortLabel(course.level)})` : ''}
                                   {hasSubs && (
                                     <ol className="ml-4 mt-1 space-y-1">
                                       {course.subcategories.map((sub, subIdx) => {

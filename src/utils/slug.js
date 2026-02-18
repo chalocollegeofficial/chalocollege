@@ -1,5 +1,12 @@
 // src/utils/slug.js
 
+import {
+  DEFAULT_COURSE_LEVEL,
+  getAllCourseLevelSlugTokens,
+  getCourseLevelFromSlugToken,
+  getCourseLevelSlugToken,
+} from '../lib/courseLevels';
+
 /**
  * Basic, URL-safe slugify.
  * - Lowercase
@@ -127,7 +134,7 @@ export const extractCollegeIdFromSlug = (collegeSlugOrId = '') => {
  */
 export const createCourseSlug = (course, index = 0) => {
   const name = course?.name || '';
-  const level = String(course?.level || 'UG').toLowerCase();
+  const level = getCourseLevelSlugToken(course?.level || DEFAULT_COURSE_LEVEL);
   const base = slugify(name);
   const safeIndex = Number.isFinite(Number(index)) ? Number(index) : 0;
   return `${base}-${level}-${safeIndex}`;
@@ -137,8 +144,30 @@ export const createCourseSlug = (course, index = 0) => {
  * Parses "{course}-{level}-{index}" slugs.
  */
 export const parseCourseSlug = (courseSlug = '') => {
-  const raw = String(courseSlug || '').trim();
-  const m = raw.match(/-(ug|pg|diploma|phd)-(\d+)$/i);
+  const raw = String(courseSlug || '').trim().toLowerCase();
+  const m = raw.match(/-(\d+)$/);
   if (!m) return { level: null, index: null };
-  return { level: m[1].toUpperCase(), index: Number(m[2]) };
+
+  const index = Number(m[1]);
+  const withoutIndex = raw.slice(0, raw.length - m[0].length);
+
+  for (const token of getAllCourseLevelSlugTokens()) {
+    if (withoutIndex.endsWith(`-${token}`)) {
+      return {
+        level: getCourseLevelFromSlugToken(token),
+        index,
+      };
+    }
+  }
+
+  // Backward-compatible fallback for old slugs.
+  const legacy = withoutIndex.match(/-(ug|pg|diploma|phd)$/i);
+  if (legacy) {
+    return {
+      level: getCourseLevelFromSlugToken(legacy[1]),
+      index,
+    };
+  }
+
+  return { level: null, index };
 };

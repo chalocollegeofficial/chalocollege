@@ -6,6 +6,13 @@ import { ArrowLeft, BookOpen, Download, ExternalLink, Loader2 } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/customSupabaseClient';
 import { createCollegeSlug, createCourseSlug, extractCollegeIdFromSlug } from '@/utils/slug';
+import {
+  DEFAULT_COURSE_LEVEL,
+  getCourseLevelCoursesLabel,
+  getCourseLevelOrder,
+  getCourseLevelShortLabel,
+  normalizeCourseLevel,
+} from '@/lib/courseLevels';
 
 const parseCourseCategories = (raw) => {
   if (!raw) return [];
@@ -19,15 +26,6 @@ const parseCourseCategories = (raw) => {
     }
   }
   return [];
-};
-
-const normalizeLevelLabel = (level) => {
-  const v = String(level || '').toUpperCase();
-  if (v === 'UG') return 'UG Courses';
-  if (v === 'PG') return 'PG Courses';
-  if (v === 'PHD') return 'PhD Courses';
-  if (v === 'DIPLOMA') return 'Diploma Courses';
-  return `${v || 'Courses'}`;
 };
 
 const getOrigin = () => {
@@ -82,7 +80,7 @@ const CollegeCoursesPage = () => {
       .map((c, idx) => ({
         __index: idx,
         name: c?.name || '',
-        level: c?.level || 'UG',
+        level: normalizeCourseLevel(c?.level || DEFAULT_COURSE_LEVEL),
         brochure_url: c?.brochure_url || '',
         subcategories: Array.isArray(c?.subcategories) ? c.subcategories : [],
       }))
@@ -94,7 +92,7 @@ const CollegeCoursesPage = () => {
   const coursesByLevel = useMemo(() => {
     const groups = {};
     for (const c of courseCategories) {
-      const lvl = String(c.level || 'UG').toUpperCase();
+      const lvl = normalizeCourseLevel(c.level || DEFAULT_COURSE_LEVEL);
       if (!groups[lvl]) groups[lvl] = [];
       groups[lvl].push(c);
     }
@@ -146,7 +144,7 @@ const CollegeCoursesPage = () => {
         <title>{`${collegeData.college_name} Courses & Fees - Aao College`}</title>
         <meta
           name="description"
-          content={`Explore all courses and fees at ${collegeData.college_name}. View UG/PG course categories, specializations, duration, and brochure links.`}
+          content={`Explore all courses and fees at ${collegeData.college_name}. View UG, PG, certificate, diploma, doctoral, and working-professional programs with specializations, duration, and brochure links.`}
         />
         <link rel="canonical" href={canonicalUrl} />
         {jsonLdItemList ? (
@@ -172,7 +170,7 @@ const CollegeCoursesPage = () => {
                   Courses & Fees at <span className="text-blue-600">{collegeData.college_name}</span>
                 </h1>
                 <p className="text-gray-600 mt-2">
-                  Browse all UG/PG course categories, specializations, duration, and fee details.
+                  Browse all course levels, specializations, duration, and fee details.
                 </p>
               </div>
             </div>
@@ -185,13 +183,12 @@ const CollegeCoursesPage = () => {
               ) : (
                 Object.entries(coursesByLevel)
                   .sort(([a], [b]) => {
-                    const order = { UG: 1, PG: 2, DIPLOMA: 3, PHD: 4 };
-                    return (order[a] || 99) - (order[b] || 99);
+                    return getCourseLevelOrder(a) - getCourseLevelOrder(b);
                   })
                   .map(([level, list]) => (
                     <div key={level} className="bg-white rounded-2xl shadow-xl p-6">
                       <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">
-                        {normalizeLevelLabel(level)}
+                        {getCourseLevelCoursesLabel(level)}
                       </h2>
 
                       <div className="grid md:grid-cols-2 gap-6">
@@ -210,7 +207,7 @@ const CollegeCoursesPage = () => {
                                     {course.name}
                                   </Link>
                                   <p className="text-xs text-slate-500 mt-1 uppercase tracking-wide">
-                                    {String(course.level || 'UG')}
+                                    {getCourseLevelShortLabel(course.level || DEFAULT_COURSE_LEVEL)}
                                   </p>
                                 </div>
 

@@ -33,4 +33,7 @@ Notes
 - Keep column names exactly the same as in templates to avoid mapping errors.
 - `images` is stored as text in the DB but parsed as an array in the admin panel — keep it as a pipe list in CSV or array in JSON.
 - `courses`/`placements` must remain valid JSON; validate with any linter before import.
+- `courses[].level` supported values:
+  `UG`, `PG`, `CERTIFICATE`, `DIPLOMA`, `DOCTORAL`, `WORKING_PROFESSIONALS`
+  (`UG_PG` and legacy values like `PHD` are still read and normalized).
 - You can delete the sample rows and duplicate as many as needed.

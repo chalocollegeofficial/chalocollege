@@ -1,16 +1,12 @@
 /**
  * Course category mapping helpers.
  *
- * Problem fixed:
- * - Your Admin panel stores courses in the structured `courses` column
- *   (array of objects with { name, level, brochure_url, subcategories }).
- * - Home page category cards were only reading `courses_offered`, so newly
- *   added colleges were not getting mapped correctly.
+ * This file normalizes and maps course names from all supported shapes:
+ * - `courses_offered` (legacy)
+ * - `courses` (structured)
+ * - `courses[].subcategories` (actual program names)
  *
- * This file now:
- * - Reads BOTH `courses_offered` (legacy) and `courses` (structured)
- * - Uses stronger normalization so "B Tech" / "B.Tech" / "B.Tech." all match
- * - Avoids common false-positives for "Computer Application" (e.g. B.Tech CSE)
+ * It also uses safer matching to avoid false positives from substring overlap.
  */
 
 export const COURSE_CATEGORIES = [
@@ -25,6 +21,7 @@ export const COURSE_CATEGORIES = [
       'mtech',
       'm tech',
       'm.tech',
+      'be',
       'b e',
       'b.e',
       'b.e.',
@@ -51,19 +48,57 @@ export const COURSE_CATEGORIES = [
       'commerce',
       'management',
       'business administration',
+      'business analytics',
+      'international business',
+      'hotel management',
+      'marketing',
+      'finance',
     ],
   },
   {
     key: 'law',
     label: 'Law',
     icon: 'scale',
-    keywords: ['llb', 'll.m', 'llm', 'law', 'ba llb', 'bba llb', 'llb hons'],
+    keywords: [
+      'llb',
+      'll b',
+      'll.m',
+      'llm',
+      'll m',
+      'law',
+      'ba llb',
+      'ba ll b',
+      'bba llb',
+      'bba ll b',
+      'llb hons',
+      'll b hons',
+      'bachelor of laws',
+      'bcom llb',
+      'b com llb',
+    ],
   },
   {
     key: 'pharmacy',
     label: 'Pharmacy',
     icon: 'flask',
-    keywords: ['pharmacy', 'bpharm', 'b pharm', 'b.pharm', 'mpharm', 'm pharm', 'm.pharm', 'dpharm', 'd pharm', 'd.pharm'],
+    keywords: [
+      'pharmacy',
+      'pharmaceutics',
+      'bpharm',
+      'b pharm',
+      'b pharma',
+      'b.pharm',
+      'mpharm',
+      'm pharm',
+      'm pharma',
+      'm.pharm',
+      'dpharm',
+      'd pharm',
+      'd pharma',
+      'd.pharm',
+      'pharm d',
+      'pharmd',
+    ],
   },
   {
     key: 'computer-application',
@@ -73,6 +108,7 @@ export const COURSE_CATEGORIES = [
       'bca',
       'mca',
       'computer application',
+      'computer applications',
       'bsc it',
       'b.sc it',
       'msc it',
@@ -89,7 +125,26 @@ export const COURSE_CATEGORIES = [
     key: 'design',
     label: 'Design Courses',
     icon: 'paintbrush',
-    keywords: ['design', 'bdes', 'b des', 'b.des', 'mdes', 'm des', 'm.des', 'fashion', 'interior', 'ui ux', 'ux', 'graphic'],
+    keywords: [
+      'bdes',
+      'b des',
+      'b.des',
+      'mdes',
+      'm des',
+      'm.des',
+      'fashion',
+      'interior',
+      'ui ux',
+      'ux ui',
+      'graphic',
+      'animation',
+      'product design',
+      'communication design',
+      'school of design',
+      'department of design',
+      'design course',
+      'design courses',
+    ],
   },
 ];
 
@@ -110,7 +165,8 @@ const normalizeLoose = (s) => {
   return text;
 };
 
-const compact = (s) => normalizeLoose(s).replace(/\s+/g, '');
+const escapeRegExp = (s) =>
+  String(s || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const safeJsonParse = (value) => {
   if (typeof value !== 'string') return null;
@@ -171,42 +227,73 @@ const getStructuredCourses = (college) => {
   return Array.isArray(parsed) ? parsed : [];
 };
 
-/**
- * ✅ Unified: get course names from BOTH shapes.
- * - courses_offered: legacy simple list
- * - courses: structured list from Admin panel
- */
-export const getCollegeCourseNames = (college) => {
+const getCollegeCourseEntries = (college) => {
   if (!college) return [];
 
-  const names = [];
+  const entries = [];
 
-  // 1) Legacy/simple field
+  const pushEntry = (name, options = {}) => {
+    const cleanName = String(name || '').trim();
+    if (!cleanName) return;
+
+    entries.push({
+      name: cleanName,
+      parentName: String(options.parentName || '').trim(),
+      source: options.source || 'legacy',
+    });
+  };
+
+  // Legacy/simple field
   const offeredRaw = safeToArray(college.courses_offered);
   for (const item of offeredRaw) {
-    const name = String(normalizeCourseItemToName(item) || '').trim();
-    if (name) names.push(name);
+    pushEntry(normalizeCourseItemToName(item), { source: 'courses_offered' });
   }
 
-  // 2) Structured field (Admin panel)
+  // Structured field (Admin panel)
   const structured = getStructuredCourses(college);
   for (const c of structured) {
-    const name = String(c?.name || '').trim();
-    if (name) names.push(name);
+    const parentName = String(c?.name || '').trim();
+    pushEntry(parentName, { source: 'courses' });
+
+    const subcategories = safeToArray(c?.subcategories);
+    for (const sub of subcategories) {
+      pushEntry(normalizeCourseItemToName(sub), {
+        source: 'subcategories',
+        parentName,
+      });
+    }
   }
 
-  // De-duplicate (preserve order)
+  // De-duplicate by name + parent + source
   const seen = new Set();
-  const unique = [];
-  for (const n of names) {
-    const k = normalizeLoose(n);
+  const uniqueEntries = [];
+  for (const entry of entries) {
+    const k = `${normalizeLoose(entry.name)}|${normalizeLoose(entry.parentName)}|${entry.source}`;
     if (!k) continue;
     if (seen.has(k)) continue;
     seen.add(k);
-    unique.push(n);
+    uniqueEntries.push(entry);
   }
 
-  return unique;
+  return uniqueEntries;
+};
+
+/**
+ * Unified list of course names for one college.
+ */
+export const getCollegeCourseNames = (college) => {
+  const entries = getCollegeCourseEntries(college);
+
+  const seen = new Set();
+  const uniqueNames = [];
+  for (const entry of entries) {
+    const k = normalizeLoose(entry.name);
+    if (!k || seen.has(k)) continue;
+    seen.add(k);
+    uniqueNames.push(entry.name);
+  }
+
+  return uniqueNames;
 };
 
 // -----------------------------
@@ -218,54 +305,149 @@ const keywordIncluded = (text, keyword) => {
   const k = normalizeLoose(keyword);
   if (!t || !k) return false;
 
-  // Normal include
-  if (t.includes(k)) return true;
-
-  // Also match punctuation/spacing variations (e.g. "b.tech" vs "b tech")
-  const tc = compact(text);
-  const kc = compact(keyword);
-  return tc && kc ? tc.includes(kc) : false;
+  // Boundary-safe phrase match.
+  const re = new RegExp(`(?:^| )${escapeRegExp(k)}(?: |$)`);
+  return re.test(t);
 };
 
 const isEngineeringCourse = (courseName) => {
-  // Use only strong engineering indicators here
-  const t = normalizeLoose(courseName);
-  if (!t) return false;
-  return (
-    t.includes('btech') ||
-    t.includes('b tech') ||
-    t.includes('mtech') ||
-    t.includes('m tech') ||
-    t.includes('b e') ||
-    t.includes('engineering') ||
-    t.includes('polytechnic')
-  );
+  if (!courseName) return false;
+  return ['btech', 'b tech', 'mtech', 'm tech', 'be', 'b e', 'engineering', 'polytechnic']
+    .some((kw) => keywordIncluded(courseName, kw));
 };
 
-const courseMatchesCategory = (courseName, categoryKey) => {
+const isBusinessOrManagementCourse = (courseName) => {
+  if (!courseName) return false;
+  return ['mba', 'management', 'business', 'pgdm', 'commerce', 'bba', 'bcom']
+    .some((kw) => keywordIncluded(courseName, kw));
+};
+
+const isStrongComputerApplicationCourse = (courseName) => {
+  if (!courseName) return false;
+  return [
+    'bca',
+    'mca',
+    'computer application',
+    'computer applications',
+    'bsc it',
+    'b.sc it',
+    'msc it',
+    'm.sc it',
+    'computer science',
+  ].some((kw) => keywordIncluded(courseName, kw));
+};
+
+const isStrongDesignCourse = (courseName) => {
+  if (!courseName) return false;
+  return [
+    'bdes',
+    'b des',
+    'mdes',
+    'm des',
+    'fashion',
+    'interior',
+    'ui ux',
+    'ux ui',
+    'graphic',
+    'animation',
+    'product design',
+    'communication design',
+    'school of design',
+    'department of design',
+    'design course',
+    'design courses',
+  ].some((kw) => keywordIncluded(courseName, kw));
+};
+
+const toCourseEntry = (courseOrEntry) => {
+  if (typeof courseOrEntry === 'string') {
+    return {
+      name: courseOrEntry,
+      parentName: '',
+      source: 'legacy',
+    };
+  }
+
+  if (courseOrEntry && typeof courseOrEntry === 'object') {
+    return {
+      name: courseOrEntry.name || '',
+      parentName: courseOrEntry.parentName || '',
+      source: courseOrEntry.source || 'legacy',
+    };
+  }
+
+  return { name: '', parentName: '', source: 'legacy' };
+};
+
+const courseMatchesCategory = (courseOrEntry, categoryKey) => {
   const category = getCourseCategoryByKey(categoryKey);
   if (!category) return false;
-  const course = String(courseName || '').trim();
+
+  const entry = toCourseEntry(courseOrEntry);
+  const course = String(entry.name || '').trim();
   if (!course) return false;
 
-  // Special rule: avoid mapping Engineering courses into "Computer Application".
+  // Avoid mapping Engineering courses into "Computer Application".
   if (categoryKey === 'computer-application' && isEngineeringCourse(course)) {
-    // Example: "B.Tech Computer Science & Engineering" should stay in Engineering.
-    // Allow only BCA/MCA etc which are not engineering degrees.
-    const allow = ['bca', 'mca', 'computer application'].some((kw) => keywordIncluded(course, kw));
+    const allow = ['bca', 'mca', 'computer application', 'computer applications']
+      .some((kw) => keywordIncluded(course, kw));
     if (!allow) return false;
+  }
+
+  // Subcategory inside Engineering parent should stay Engineering unless it is an explicit CA program.
+  if (
+    categoryKey === 'computer-application' &&
+    entry.source === 'subcategories' &&
+    isEngineeringCourse(entry.parentName)
+  ) {
+    const allow = ['bca', 'mca', 'computer application', 'computer applications']
+      .some((kw) => keywordIncluded(course, kw));
+    if (!allow) return false;
+  }
+
+  // Management specializations like "MBA in Information Technology" should stay in Business.
+  if (
+    categoryKey === 'computer-application' &&
+    isBusinessOrManagementCourse(course) &&
+    !isStrongComputerApplicationCourse(course)
+  ) {
+    return false;
+  }
+
+  // Avoid VLSI/CAD engineering terms inflating "Design Courses" card.
+  if (
+    categoryKey === 'design' &&
+    entry.source === 'subcategories' &&
+    isEngineeringCourse(entry.parentName) &&
+    !isStrongDesignCourse(course)
+  ) {
+    return false;
   }
 
   return category.keywords.some((kw) => keywordIncluded(course, kw));
 };
 
 export const collegeMatchesCourseCategory = (college, categoryKey) => {
-  const courseNames = getCollegeCourseNames(college);
-  if (courseNames.length === 0) return false;
-  return courseNames.some((course) => courseMatchesCategory(course, categoryKey));
+  const courseEntries = getCollegeCourseEntries(college);
+  if (courseEntries.length === 0) return false;
+  return courseEntries.some((entry) => courseMatchesCategory(entry, categoryKey));
 };
 
 export const getMatchingCoursesForCategory = (college, categoryKey) => {
-  const courseNames = getCollegeCourseNames(college);
-  return courseNames.filter((course) => courseMatchesCategory(course, categoryKey));
+  const courseEntries = getCollegeCourseEntries(college);
+  const names = courseEntries
+    .filter((entry) => courseMatchesCategory(entry, categoryKey))
+    .map((entry) => String(entry.name || '').trim())
+    .filter(Boolean);
+
+  const seen = new Set();
+  const uniqueNames = [];
+  for (const name of names) {
+    const k = normalizeLoose(name);
+    if (!k || seen.has(k)) continue;
+    seen.add(k);
+    uniqueNames.push(name);
+  }
+
+  return uniqueNames;
 };
