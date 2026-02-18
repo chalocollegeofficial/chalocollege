@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "vite --host :: --port 3000",
-    "build": "vite build",
+    "seo:generate": "node tools/generate-sitemap.js && node tools/generate-llms.js",
+    "build": "npm run seo:generate && vite build",
     "preview": "vite preview --host :: --port 3000",
     "lint": "eslint src"
   },

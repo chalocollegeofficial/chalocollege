@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Helmet } from 'react-helmet';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, BookOpen, Download, ExternalLink, Loader2 } from 'lucide-react';
 
@@ -13,6 +12,8 @@ import {
   getCourseLevelShortLabel,
   normalizeCourseLevel,
 } from '@/lib/courseLevels';
+import SeoHead from '@/components/common/SeoHead';
+import { pickSeoDescription, pickSeoKeywords, pickSeoTitle } from '@/lib/seo';
 
 const parseCourseCategories = (raw) => {
   if (!raw) return [];
@@ -120,6 +121,35 @@ const CollegeCoursesPage = () => {
     };
   }, [collegeCanonicalSlug, courseCategories]);
 
+  const seoTitle = useMemo(
+    () =>
+      pickSeoTitle(
+        collegeData?.meta_title ? `${collegeData.meta_title} Courses & Fees` : '',
+        `${collegeData?.college_name || 'College'} Courses & Fees - Aao College`
+      ),
+    [collegeData?.college_name, collegeData?.meta_title]
+  );
+
+  const seoDescription = useMemo(
+    () =>
+      pickSeoDescription(
+        collegeData?.meta_description,
+        `Explore all courses and fees at ${collegeData?.college_name || 'this college'}. View UG, PG, certificate, diploma, doctoral, and working-professional programs with specializations, duration, and brochure links.`
+      ),
+    [collegeData?.college_name, collegeData?.meta_description]
+  );
+
+  const seoKeywords = useMemo(
+    () =>
+      pickSeoKeywords(collegeData?.meta_keywords, [
+        collegeData?.college_name,
+        `${collegeData?.college_name || 'college'} courses`,
+        `${collegeData?.college_name || 'college'} fees`,
+        'college courses',
+      ]),
+    [collegeData?.college_name, collegeData?.meta_keywords]
+  );
+
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -140,17 +170,13 @@ const CollegeCoursesPage = () => {
 
   return (
     <>
-      <Helmet>
-        <title>{`${collegeData.college_name} Courses & Fees - Aao College`}</title>
-        <meta
-          name="description"
-          content={`Explore all courses and fees at ${collegeData.college_name}. View UG, PG, certificate, diploma, doctoral, and working-professional programs with specializations, duration, and brochure links.`}
-        />
-        <link rel="canonical" href={canonicalUrl} />
-        {jsonLdItemList ? (
-          <script type="application/ld+json">{JSON.stringify(jsonLdItemList)}</script>
-        ) : null}
-      </Helmet>
+      <SeoHead
+        title={seoTitle}
+        description={seoDescription}
+        keywords={seoKeywords}
+        canonicalUrl={canonicalUrl}
+        jsonLd={jsonLdItemList}
+      />
 
       <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen pb-12">
         <section className="py-8">

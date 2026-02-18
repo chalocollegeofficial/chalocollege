@@ -60,6 +60,9 @@ const AdminColleges = () => {
     // ✅ NEW
     brief_description: '', // 1-2 lines
     description: '',       // ✅ Rich HTML
+    meta_title: '',
+    meta_description: '',
+    meta_keywords: '',
 
     images: [],
     video_url: '',
@@ -273,6 +276,9 @@ const AdminColleges = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    const hasManualSeo = [formData.meta_title, formData.meta_description, formData.meta_keywords]
+      .some((value) => String(value || '').trim() !== '');
+    let seoColumnsMissing = false;
 
     try {
       // ✅ FIX: Placements now comes from simple fields (average/highest) and is saved as JSON object
@@ -334,6 +340,9 @@ const AdminColleges = () => {
         // ✅ NEW
         brief_description: formData.brief_description,
         description: formData.description,
+        meta_title: (formData.meta_title || '').trim() || null,
+        meta_description: (formData.meta_description || '').trim() || null,
+        meta_keywords: (formData.meta_keywords || '').trim() || null,
 
         video_url: formData.video_url,
         placements: placementsJson,
@@ -349,6 +358,11 @@ const AdminColleges = () => {
         // images stored as TEXT in DB
         images: JSON.stringify(formData.images),
       };
+      const payloadWithoutSeo = Object.fromEntries(
+        Object.entries(payload).filter(
+          ([key]) => !['meta_title', 'meta_description', 'meta_keywords'].includes(key)
+        )
+      );
 
       let error;
       if (editingId) {
@@ -357,16 +371,46 @@ const AdminColleges = () => {
           .update(payload)
           .eq('id', editingId);
         error = err;
+
+        if (
+          error &&
+          /meta_title|meta_description|meta_keywords/i.test(error.message || '')
+        ) {
+          seoColumnsMissing = true;
+          const { error: fallbackErr } = await supabase
+            .from('colleges')
+            .update(payloadWithoutSeo)
+            .eq('id', editingId);
+          error = fallbackErr;
+        }
       } else {
         const { error: err } = await supabase
           .from('colleges')
           .insert([payload]);
         error = err;
+
+        if (
+          error &&
+          /meta_title|meta_description|meta_keywords/i.test(error.message || '')
+        ) {
+          seoColumnsMissing = true;
+          const { error: fallbackErr } = await supabase
+            .from('colleges')
+            .insert([payloadWithoutSeo]);
+          error = fallbackErr;
+        }
       }
 
       if (error) throw error;
 
       toast({ title: editingId ? "Updated successfully" : "Created successfully" });
+      if (seoColumnsMissing && hasManualSeo) {
+        toast({
+          variant: 'destructive',
+          title: 'SEO fields not saved',
+          description: 'Run SQL migration to add meta_title/meta_description/meta_keywords columns in colleges table.',
+        });
+      }
       fetchColleges(debouncedSearch);
       setIsDialogOpen(false);
       resetForm();
@@ -463,6 +507,9 @@ const AdminColleges = () => {
 
       brief_description: college.brief_description || '',
       description: college.description || '',
+      meta_title: college.meta_title || '',
+      meta_description: college.meta_description || '',
+      meta_keywords: college.meta_keywords || '',
 
       images: parsedImages,
       video_url: college.video_url || '',
@@ -697,6 +744,39 @@ const AdminColleges = () => {
                     value={formData.brief_description}
                     onChange={e => setFormData({ ...formData, brief_description: e.target.value })}
                     placeholder="Short summary shown near image (1–2 lines)"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">SEO Title</label>
+                    <input
+                      className="w-full p-2 border rounded"
+                      value={formData.meta_title}
+                      onChange={e => setFormData({ ...formData, meta_title: e.target.value })}
+                      placeholder="Custom title for Google result (optional)"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">SEO Keywords</label>
+                    <input
+                      className="w-full p-2 border rounded"
+                      value={formData.meta_keywords}
+                      onChange={e => setFormData({ ...formData, meta_keywords: e.target.value })}
+                      placeholder="engineering college, mba college, ..."
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">SEO Description</label>
+                  <textarea
+                    rows={2}
+                    className="w-full p-2 border rounded"
+                    value={formData.meta_description}
+                    onChange={e => setFormData({ ...formData, meta_description: e.target.value })}
+                    placeholder="Custom description for search snippets (optional)"
                   />
                 </div>
 

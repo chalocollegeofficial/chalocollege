@@ -57,11 +57,11 @@ const Footer = () => {
           <div>
             <span className="text-lg font-semibold mb-4 block">Services</span>
             <ul className="space-y-2">
-              <li><Link to="/colleges" className="text-gray-400">College Search</Link></li>
-              <li><Link to="/services" className="text-gray-400">Admission Consulting</Link></li>
-              <li><Link to="/contact" className="text-gray-400">Course Counseling</Link></li>
-              <li><Link to="/mentorship" className="text-gray-400" >Scholarship Guidance</Link></li>
-              <li><Link to="/blog" className="text-gray-400">Entrance Exam Prep</Link></li>
+              <li><Link to="/services/college-search" className="text-gray-400">College Search</Link></li>
+              <li><Link to="/services/admission-consulting" className="text-gray-400">Admission Consulting</Link></li>
+              <li><Link to="/services/course-counseling" className="text-gray-400">Course Counseling</Link></li>
+              <li><Link to="/services/scholarship-guidance" className="text-gray-400" >Scholarship Guidance</Link></li>
+              <li><Link to="/services/entrance-exam-prep" className="text-gray-400">Entrance Exam Prep</Link></li>
             </ul>
           </div>
 

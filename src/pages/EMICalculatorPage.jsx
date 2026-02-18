@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
@@ -11,8 +10,11 @@ import { notifyAdminNewLead } from '@/utils/emailService';
 import { toast } from '@/components/ui/use-toast';
 import { validateName, validateEmail, validatePhone, handleNumericInput } from '@/utils/validation';
 import { useSubmissionLock } from '@/utils/useSubmissionLock';
+import SeoHead from '@/components/common/SeoHead';
+import { STATIC_PAGE_SEO } from '@/lib/seo';
 
 const EMICalculatorPage = () => {
+  const pageSeo = STATIC_PAGE_SEO.emi;
   // Using direct toast import instead of hook
   
   // Calculator State
@@ -145,10 +147,12 @@ const EMICalculatorPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <Helmet>
-        <title>Bank of Baroda Education Loan EMI Calculator - Aao College</title>
-        <meta name="description" content="Calculate your monthly EMI for Bank of Baroda education loan. Get instant breakdown of interest and total payment." />
-      </Helmet>
+      <SeoHead
+        title={pageSeo.title}
+        description={pageSeo.description}
+        keywords={pageSeo.keywords}
+        canonicalPath={pageSeo.canonicalPath}
+      />
 
       {/* Hero Section */}
       <div className="bg-[#f05a22] text-white py-12 px-4 relative overflow-hidden">

@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet';
 import { Calendar, User, ArrowRight, Search } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/customSupabaseClient';
 import { Button } from '@/components/ui/button';
+import SeoHead from '@/components/common/SeoHead';
+import { STATIC_PAGE_SEO } from '@/lib/seo';
+import { createBlogSlug } from '@/utils/slug';
 
 const BlogPage = () => {
+  const pageSeo = STATIC_PAGE_SEO.blog;
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -40,10 +43,12 @@ const BlogPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Helmet>
-        <title>Education Blog - Career & Admission Tips | Aao College</title>
-        <meta name="description" content="Read latest articles about college admissions, entrance exams, career guidance, and student life." />
-      </Helmet>
+      <SeoHead
+        title={pageSeo.title}
+        description={pageSeo.description}
+        keywords={pageSeo.keywords}
+        canonicalPath={pageSeo.canonicalPath}
+      />
 
       <div className="bg-blue-900 text-white py-16">
         <div className="container mx-auto px-4 text-center">
@@ -87,7 +92,7 @@ const BlogPage = () => {
             {filteredPosts.map((post) => (
               <div
                 key={post.id}
-                onClick={() => navigate(`/blog/${post.id}`)}
+                onClick={() => navigate(`/blog/${createBlogSlug(post)}/${post.id}`)}
                 className="cursor-pointer bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow border border-gray-100 group"
               >
                 <div className="h-48 overflow-hidden">

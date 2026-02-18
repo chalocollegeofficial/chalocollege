@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
@@ -7,8 +6,11 @@ import { Button } from '@/components/ui/button';
 import ImageGallery from '@/components/common/ImageGallery';
 import PGEnquiryModal from '@/components/PGEnquiryModal';
 import { Loader2, Search, MapPin, Home, PlayCircle, BedDouble, IndianRupee, ShieldCheck } from 'lucide-react';
+import SeoHead from '@/components/common/SeoHead';
+import { STATIC_PAGE_SEO } from '@/lib/seo';
 
 const PGListingsPage = () => {
+  const pageSeo = STATIC_PAGE_SEO.pgListings;
   const { toast } = useToast();
 
   const [listings, setListings] = useState([]);
@@ -91,15 +93,36 @@ const PGListingsPage = () => {
     return [];
   };
 
+  const pgListingSchema = useMemo(() => {
+    const elements = (listings || [])
+      .filter(isApproved)
+      .slice(0, 20)
+      .map((pg, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: pg.pg_name || 'PG Listing',
+        item: 'https://aaocollege.com/get-pg',
+      }));
+
+    if (elements.length === 0) return null;
+
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: 'Student PG Listings',
+      itemListElement: elements,
+    };
+  }, [listings]);
+
   return (
     <>
-      <Helmet>
-        <title>Get PG - Aao College</title>
-        <meta
-          name="description"
-          content="Find PG/Hostel options with rent, room type, facilities, and send enquiry to get best PG suggestions."
-        />
-      </Helmet>
+      <SeoHead
+        title={pageSeo.title}
+        description={pageSeo.description}
+        keywords={pageSeo.keywords}
+        canonicalPath={pageSeo.canonicalPath}
+        jsonLd={pgListingSchema}
+      />
 
       <PGEnquiryModal
         isOpen={showEnquiry}

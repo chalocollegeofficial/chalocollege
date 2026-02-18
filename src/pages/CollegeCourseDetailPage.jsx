@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Helmet } from 'react-helmet';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, BookOpen, Download, ExternalLink, Loader2 } from 'lucide-react';
 
@@ -11,6 +10,8 @@ import {
   getCourseLevelShortLabel,
   normalizeCourseLevel,
 } from '@/lib/courseLevels';
+import SeoHead from '@/components/common/SeoHead';
+import { pickSeoDescription, pickSeoKeywords, pickSeoTitle } from '@/lib/seo';
 
 const parseCourseCategories = (raw) => {
   if (!raw) return [];
@@ -118,6 +119,35 @@ const CollegeCourseDetailPage = () => {
     };
   }, [selectedCourse, collegeData, collegeCanonicalSlug]);
 
+  const seoTitle = useMemo(
+    () =>
+      pickSeoTitle(
+        '',
+        `${selectedCourse?.name || 'Course'} at ${collegeData?.college_name || 'College'} - Aao College`
+      ),
+    [selectedCourse?.name, collegeData?.college_name]
+  );
+
+  const seoDescription = useMemo(
+    () =>
+      pickSeoDescription(
+        '',
+        `Explore ${selectedCourse?.name || 'course'} at ${collegeData?.college_name || 'this college'}. View specializations, fee, duration, and brochure links.`
+      ),
+    [selectedCourse?.name, collegeData?.college_name]
+  );
+
+  const seoKeywords = useMemo(
+    () =>
+      pickSeoKeywords(collegeData?.meta_keywords, [
+        selectedCourse?.name,
+        `${selectedCourse?.name || 'course'} fee`,
+        `${selectedCourse?.name || 'course'} duration`,
+        collegeData?.college_name,
+      ]),
+    [collegeData?.college_name, collegeData?.meta_keywords, selectedCourse?.name]
+  );
+
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -154,15 +184,13 @@ const CollegeCourseDetailPage = () => {
 
   return (
     <>
-      <Helmet>
-        <title>{`${selectedCourse.name} at ${collegeData.college_name} - Aao College`}</title>
-        <meta
-          name="description"
-          content={`Explore ${selectedCourse.name} at ${collegeData.college_name}. View specializations, fee, duration, and brochure links.`}
-        />
-        <link rel="canonical" href={canonicalUrl} />
-        {courseSchema ? <script type="application/ld+json">{JSON.stringify(courseSchema)}</script> : null}
-      </Helmet>
+      <SeoHead
+        title={seoTitle}
+        description={seoDescription}
+        keywords={seoKeywords}
+        canonicalUrl={canonicalUrl}
+        jsonLd={courseSchema}
+      />
 
       <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen pb-12">
         <section className="py-8">

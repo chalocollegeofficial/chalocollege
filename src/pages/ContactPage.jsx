@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { 
   User, Mail, Phone, MapPin, BookOpen, GraduationCap, 
@@ -22,8 +21,11 @@ import {
   validateCourse, handleNumericInput 
 } from '@/utils/validation';
 import { cn } from '@/lib/utils';
+import SeoHead from '@/components/common/SeoHead';
+import { STATIC_PAGE_SEO } from '@/lib/seo';
 
 const ContactPage = () => {
+  const pageSeo = STATIC_PAGE_SEO.contact;
   const { toast } = useToast();
   const { hasSubmitted: leadLocked, markSubmitted: lockLead, clearLock } = useSubmissionLock('lead-global', 180);
   
@@ -282,10 +284,12 @@ const ContactPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50 font-sans">
-      <Helmet>
-        <title>Admissions Enquiry & Mentorship | Aao College</title>
-        <meta name="description" content="Enquire for college admissions, scholarship guidance, and free mentorship. Talk to experts today." />
-      </Helmet>
+      <SeoHead
+        title={pageSeo.title}
+        description={pageSeo.description}
+        keywords={pageSeo.keywords}
+        canonicalPath={pageSeo.canonicalPath}
+      />
 
       <div className="container mx-auto px-4 py-16 md:py-24 max-w-7xl">
         

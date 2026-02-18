@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- =========================================================
+         BASIC
+  ========================================================== -->
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Brand/Generator -->
+  <meta name="generator" content="AaoCollege" />
+  <meta name="application-name" content="AaoCollege" />
+
+  <meta name="google-site-verification" content="KKPTwXIMLMrtqrljucrQukblMJOZz4UxbYh-4uMUDQY" />
+
+  <!-- =========================================================
+         TITLE + DESCRIPTION
+  ========================================================== -->
+  <title>Aao College | College Search, Admission Guidance & Mentorship</title>
+  <meta name="author" content="AaoCollege" />
+
+  <!-- =========================================================
+         FAVICONS
+         Best: keep local files in /public
+         For now: also add a fallback to your hosted logo
+  ========================================================== -->
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <!-- Fallback favicon if local files are missing -->
+  <link rel="icon" type="image/png"
+    href="/logo.png" />
+
+  <!-- Theme for mobile browser UI -->
+  <meta name="theme-color" content="#0b0f19" />
+
+  <!-- =========================================================
+         PERFORMANCE HINTS
+  ========================================================== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- =========================================================
+         STRUCTURED DATA
+  ========================================================== -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "AaoCollege",
+      "url": "https://aaocollege.com/",
+      "logo": "https://aaocollege.com/logo.png",
+      "sameAs": [
+        "https://www.facebook.com/people/Aao-College/61583548201621/",
+        "https://x.com/Aao_college",
+        "https://www.instagram.com/aao_college/",
+        "https://www.linkedin.com/in/chalo-college-b54527398/",
+        "https://www.youtube.com/@aaocollege"
+      ]
+    }
+  </script>
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "AaoCollege",
+      "url": "https://aaocollege.com/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://aaocollege.com/colleges?search={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+  </script>
+
+  <script type="module" crossorigin src="/assets/index-c12d1ed9.js"></script>
+  <link rel="stylesheet" href="/assets/index-ca9e332d.css">
+  <script type="module">
+window.onerror = (message, source, lineno, colno, errorObj) => {
+	const errorDetails = errorObj ? JSON.stringify({
+		name: errorObj.name,
+		message: errorObj.message,
+		stack: errorObj.stack,
+		source,
+		lineno,
+		colno,
+	}) : null;
+
+	window.parent.postMessage({
+		type: 'horizons-runtime-error',
+		message,
+		error: errorDetails
+	}, '*');
+};
+</script>
+  <script type="module">
+const observer = new MutationObserver((mutations) => {
+	for (const mutation of mutations) {
+		for (const addedNode of mutation.addedNodes) {
+			if (
+				addedNode.nodeType === Node.ELEMENT_NODE &&
+				(
+					addedNode.tagName?.toLowerCase() === 'vite-error-overlay' ||
+					addedNode.classList?.contains('backdrop')
+				)
+			) {
+				handleViteOverlay(addedNode);
+			}
+		}
+	}
+});
+
+observer.observe(document.documentElement, {
+	childList: true,
+	subtree: true
+});
+
+function handleViteOverlay(node) {
+	if (!node.shadowRoot) {
+		return;
+	}
+
+	const backdrop = node.shadowRoot.querySelector('.backdrop');
+
+	if (backdrop) {
+		const overlayHtml = backdrop.outerHTML;
+		const parser = new DOMParser();
+		const doc = parser.parseFromString(overlayHtml, 'text/html');
+		const messageBodyElement = doc.querySelector('.message-body');
+		const fileElement = doc.querySelector('.file');
+		const messageText = messageBodyElement ? messageBodyElement.textContent.trim() : '';
+		const fileText = fileElement ? fileElement.textContent.trim() : '';
+		const error = messageText + (fileText ? ' File:' + fileText : '');
+
+		window.parent.postMessage({
+			type: 'horizons-vite-error',
+			error,
+		}, '*');
+	}
+}
+</script>
+  <script type="module">
+const originalConsoleError = console.error;
+console.error = function(...args) {
+	originalConsoleError.apply(console, args);
+
+	let errorString = '';
+
+	for (let i = 0; i < args.length; i++) {
+		const arg = args[i];
+		if (arg instanceof Error) {
+			errorString = arg.stack || `${arg.name}: ${arg.message}`;
+			break;
+		}
+	}
+
+	if (!errorString) {
+		errorString = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ');
+	}
+
+	window.parent.postMessage({
+		type: 'horizons-console-error',
+		error: errorString
+	}, '*');
+};
+</script>
+  <script type="module">
+const originalFetch = window.fetch;
+
+window.fetch = function(...args) {
+	const url = args[0] instanceof Request ? args[0].url : args[0];
+
+	// Skip WebSocket URLs
+	if (url.startsWith('ws:') || url.startsWith('wss:')) {
+		return originalFetch.apply(this, args);
+	}
+
+	return originalFetch.apply(this, args)
+		.then(async response => {
+			const contentType = response.headers.get('Content-Type') || '';
+
+			// Exclude HTML document responses
+			const isDocumentResponse =
+				contentType.includes('text/html') ||
+				contentType.includes('application/xhtml+xml');
+
+			if (!response.ok && !isDocumentResponse) {
+					const responseClone = response.clone();
+					const errorFromRes = await responseClone.text();
+					const requestUrl = response.url;
+					console.error(`Fetch error from ${requestUrl}: ${errorFromRes}`);
+			}
+
+			return response;
+		})
+		.catch(error => {
+			if (!url.match(/.html?$/i)) {
+				console.error(error);
+			}
+
+			throw error;
+		});
+};
+</script>
+  <script type="module">
+if (window.navigation && window.self !== window.top) {
+	window.navigation.addEventListener('navigate', (event) => {
+		const url = event.destination.url;
+
+		try {
+			const destinationUrl = new URL(url);
+			const destinationOrigin = destinationUrl.origin;
+			const currentOrigin = window.location.origin;
+
+			if (destinationOrigin === currentOrigin) {
+				return;
+			}
+		} catch (error) {
+			return;
+		}
+
+		window.parent.postMessage({
+			type: 'horizons-navigation-error',
+			url,
+		}, '*');
+	});
+}
+</script>
+</head>
+
+<body>
+  <div id="root"></div>
+  
+</body>
+
+</html>

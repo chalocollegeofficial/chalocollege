@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Helmet } from 'react-helmet';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -37,6 +36,15 @@ import {
   normalizeCourseLevel,
   sortCourseLevels,
 } from '@/lib/courseLevels';
+import SeoHead from '@/components/common/SeoHead';
+import {
+  autoDescriptionFromText,
+  extractKeywordsFromText,
+  pickSeoDescription,
+  pickSeoKeywords,
+  pickSeoTitle,
+  stripHtml,
+} from '@/lib/seo';
 
 const CollegeDetailPage = () => {
   const { collegeSlug } = useParams();
@@ -356,6 +364,94 @@ const CollegeDetailPage = () => {
     return origin ? `${origin}/colleges/${collegeCanonicalSlug}` : `/colleges/${collegeCanonicalSlug}`;
   }, [collegeCanonicalSlug]);
 
+  const collegeContentText = useMemo(() => {
+    const courseNames = courseCategories.map((course) => course.name).join(' ');
+    const specializationNames = courseCategories
+      .flatMap((course) => (Array.isArray(course.subcategories) ? course.subcategories : []))
+      .map((sub) => sub?.name || '')
+      .join(' ');
+    const facilitiesText = Array.isArray(collegeData?.facilities) ? collegeData.facilities.join(' ') : '';
+
+    return [
+      collegeData?.college_name || '',
+      collegeData?.city || '',
+      collegeData?.state || '',
+      collegeData?.brief_description || '',
+      stripHtml(collegeData?.description || ''),
+      courseNames,
+      specializationNames,
+      facilitiesText,
+    ].join(' ');
+  }, [
+    collegeData?.brief_description,
+    collegeData?.city,
+    collegeData?.college_name,
+    collegeData?.description,
+    collegeData?.facilities,
+    collegeData?.state,
+    courseCategories,
+  ]);
+
+  const autoCollegeKeywords = useMemo(
+    () => extractKeywordsFromText(collegeContentText, { limit: 10, minLength: 4 }),
+    [collegeContentText]
+  );
+
+  const seoTitle = useMemo(
+    () =>
+      pickSeoTitle(
+        collegeData?.meta_title,
+        `${collegeData?.college_name || 'College'}${collegeData?.city ? `, ${collegeData.city}` : ''} - Courses, Fees, Placements | Aao College`
+      ),
+    [collegeData?.city, collegeData?.college_name, collegeData?.meta_title]
+  );
+
+  const seoDescription = useMemo(
+    () =>
+      pickSeoDescription(
+        collegeData?.meta_description,
+        autoDescriptionFromText(
+          collegeData?.brief_description || stripHtml(collegeData?.description),
+          `Learn about ${collegeData?.college_name || 'this college'}${
+            collegeData?.city ? ` in ${collegeData.city}` : ''
+          }. Get details on courses, fees, placements, facilities, and admission process.`,
+          170
+        )
+      ),
+    [collegeData?.brief_description, collegeData?.city, collegeData?.college_name, collegeData?.description, collegeData?.meta_description]
+  );
+
+  const seoKeywords = useMemo(
+    () =>
+      pickSeoKeywords(collegeData?.meta_keywords, [
+        collegeData?.college_name,
+        collegeData?.city ? `${collegeData.college_name} ${collegeData.city}` : '',
+        ...autoCollegeKeywords,
+        'college admission',
+        'college fees',
+        'college courses',
+      ]),
+    [autoCollegeKeywords, collegeData?.city, collegeData?.college_name, collegeData?.meta_keywords]
+  );
+
+  const collegeSchema = useMemo(() => {
+    if (!collegeData) return null;
+
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'CollegeOrUniversity',
+      name: collegeData.college_name,
+      description: seoDescription,
+      url: canonicalUrl,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: collegeData.city || '',
+        addressRegion: collegeData.state || '',
+        addressCountry: 'IN',
+      },
+    };
+  }, [canonicalUrl, collegeData, seoDescription]);
+
   const topCourseLinks = useMemo(() => {
     const items = courseCategories.slice(0, 6);
     return items.map((c) => {
@@ -391,16 +487,13 @@ const CollegeDetailPage = () => {
 
   return (
     <>
-      <Helmet>
-        <title>
-          {`${collegeData.college_name}${collegeData.city ? `, ${collegeData.city}` : ''} - Courses, Fees, Placements | Aao College`}
-        </title>
-        <meta
-          name="description"
-          content={`Learn about ${collegeData.college_name}${collegeData.city ? ` in ${collegeData.city}` : ''}. Get details on courses, fees, placements, facilities, and admission process.`}
-        />
-        <link rel="canonical" href={canonicalUrl} />
-      </Helmet>
+      <SeoHead
+        title={seoTitle}
+        description={seoDescription}
+        keywords={seoKeywords}
+        canonicalUrl={canonicalUrl}
+        jsonLd={collegeSchema}
+      />
 
       <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen pb-12">
         <section className="py-8">

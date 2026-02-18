@@ -1,8 +1,9 @@
 import React, { useEffect, useState, lazy, Suspense } from 'react';
-import { Helmet } from 'react-helmet';
 import NewsTicker from '@/components/home/NewsTicker';
 import HeroSection from '@/components/home/HeroSection';
 import LeadPopup from '@/components/LeadPopup';
+import SeoHead from '@/components/common/SeoHead';
+import { STATIC_PAGE_SEO } from '@/lib/seo';
 
 /* 🔹 Lazy-loaded below-the-fold sections */
 const CourseCategoriesSection = lazy(() =>
@@ -26,6 +27,7 @@ const CTASection = lazy(() =>
 
 const HomePage = () => {
   const [showAutoPopup, setShowAutoPopup] = useState(false);
+  const pageSeo = STATIC_PAGE_SEO.home;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -41,16 +43,15 @@ const HomePage = () => {
   return (
     <>
       {/* ===================== SEO & PERFORMANCE ===================== */}
-      <Helmet>
-        <title>AaoCollege® – Find Your Perfect College in India</title>
-        <meta
-          name="description"
-          content="Find your perfect college with AaoCollege. Search colleges, courses, fees, admissions, and get expert counseling guidance across India."
-        />
-
+      <SeoHead
+        title={pageSeo.title}
+        description={pageSeo.description}
+        keywords={pageSeo.keywords}
+        canonicalPath={pageSeo.canonicalPath}
+      >
         {/* 🔥 Preload Hero Image for LCP */}
         <link rel="preload" as="image" href="/hero.webp" />
-      </Helmet>
+      </SeoHead>
 
       <div className="bg-gradient-to-b from-blue-50 to-white">
         {/* ✅ News ticker below navbar */}

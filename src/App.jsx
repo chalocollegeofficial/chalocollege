@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigationType } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/contexts/SupabaseAuthContext';
 import Navbar from '@/components/Navbar';
@@ -97,6 +96,7 @@ import BlogDetailPage from '@/pages/BlogDetailPage';
 import PGListingsPage from '@/pages/PGListingsPage';
 import PGRegisterPage from '@/pages/PGRegisterPage';
 import MentorshipPage from '@/pages/MentorshipPage';
+import EMICalculatorPage from '@/pages/EMICalculatorPage';
 
 // Admin Imports
 import AdminLayout from '@/pages/admin/AdminLayout';
@@ -127,14 +127,6 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <Helmet>
-          <title>Aao College - Find Your Perfect College</title>
-          <meta
-            name="description"
-            content="AaoCollege.com par aapko milti hai complete college admission guidance – course selection se lekar form fill, counselling aur final admission tak full support."
-          />
-        </Helmet>
-
         {/* Maintains scroll position when navigating back (e.g., College listings → College detail → Back) */}
         <ScrollRestoration />
 
@@ -176,7 +168,9 @@ function App() {
                   <Route path="/" element={<HomePage />} />
                   <Route path="/about" element={<AboutPage />} />
                   <Route path="/services" element={<ServicesPage />} />
+                  <Route path="/services/:serviceSlug" element={<ServicesPage />} />
                   <Route path="/mentorship" element={<MentorshipPage />} />
+                  <Route path="/emi-calculator" element={<EMICalculatorPage />} />
                   <Route path="/colleges" element={<CollegeListingsPage />} />
 
                   {/* ✅ SEO-friendly College + Course URLs */}
@@ -188,6 +182,7 @@ function App() {
                   <Route path="/register-pg" element={<PGRegisterPage />} />
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/blog" element={<BlogPage />} />
+                  <Route path="/blog/:blogSlug/:blogId" element={<BlogDetailPage />} />
                   <Route path="/blog/:id" element={<BlogDetailPage />} />
                 </Routes>
               </MainLayout>

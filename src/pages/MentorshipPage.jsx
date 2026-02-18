@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { 
   User, Mail, Phone, MapPin, BookOpen, GraduationCap, 
@@ -19,8 +18,11 @@ import {
 } from '@/utils/validation';
 import { cn } from '@/lib/utils';
 import { useSubmissionLock } from '@/utils/useSubmissionLock';
+import SeoHead from '@/components/common/SeoHead';
+import { STATIC_PAGE_SEO } from '@/lib/seo';
 
 const MentorshipPage = () => {
+  const pageSeo = STATIC_PAGE_SEO.mentorship;
   const { toast } = useToast();
   const { hasSubmitted: leadLocked, markSubmitted: lockLead, clearLock } = useSubmissionLock('lead-global', 180);
   
@@ -120,10 +122,12 @@ const MentorshipPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-fuchsia-50 to-blue-50 font-sans">
-      <Helmet>
-        <title>Mentorship Program | Aao College</title>
-        <meta name="description" content="Connect with seniors from top colleges. Get free guidance and roadmap for your dream career." />
-      </Helmet>
+      <SeoHead
+        title={pageSeo.title}
+        description={pageSeo.description}
+        keywords={pageSeo.keywords}
+        canonicalPath={pageSeo.canonicalPath}
+      />
 
       <div className="container mx-auto px-4 py-16 md:py-24 max-w-6xl">
         

@@ -1,9 +1,12 @@
 import React from 'react';
-import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { Target, Eye, Award, Users, TrendingUp, Heart } from 'lucide-react';
+import SeoHead from '@/components/common/SeoHead';
+import { STATIC_PAGE_SEO } from '@/lib/seo';
 
 const AboutPage = () => {
+  const pageSeo = STATIC_PAGE_SEO.about;
+
   const whyChooseUs = [
     // ✅ USP 1 added (Loan services)
     {
@@ -42,10 +45,12 @@ const AboutPage = () => {
 
   return (
     <>
-      <Helmet>
-        <title>About Us - Aao College</title>
-        <meta name="description" content="Learn about Aao College's mission to help students find their perfect college. Expert guidance, proven track record, and student-centric approach." />
-      </Helmet>
+      <SeoHead
+        title={pageSeo.title}
+        description={pageSeo.description}
+        keywords={pageSeo.keywords}
+        canonicalPath={pageSeo.canonicalPath}
+      />
 
       <div className="bg-gradient-to-b from-blue-50 to-white">
         <section className="py-16 md:py-24">

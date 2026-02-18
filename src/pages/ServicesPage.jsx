@@ -1,12 +1,63 @@
-import React from 'react';
-import { Helmet } from 'react-helmet';
+import React, { useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Search, UserCheck, MessageSquare, FileText, Award, BookOpen, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import SeoHead from '@/components/common/SeoHead';
+import { STATIC_PAGE_SEO } from '@/lib/seo';
 
 const ServicesPage = () => {
   const navigate = useNavigate();
+  const { serviceSlug } = useParams();
+
+  const serviceLandingSeo = useMemo(
+    () => ({
+      'college-search': {
+        title: 'College Search Service | Aao College',
+        description: 'Find the right college by course, location, budget, and career goal with expert-guided college search.',
+        keywords: ['college search', 'find best college', 'college selection help'],
+        canonicalPath: '/services/college-search',
+        anchor: 'college-search',
+      },
+      'admission-consulting': {
+        title: 'Admission Consulting Service | Aao College',
+        description: 'Get step-by-step admission consulting for form filling, documentation, strategy, and seat confirmation.',
+        keywords: ['admission consulting', 'college admission help', 'application guidance'],
+        canonicalPath: '/services/admission-consulting',
+        anchor: 'admission-consulting',
+      },
+      'course-counseling': {
+        title: 'Course Counseling Service | Aao College',
+        description: 'One-on-one course counseling to match your academic profile, interests, and career plan.',
+        keywords: ['course counseling', 'career counseling', 'course selection guidance'],
+        canonicalPath: '/services/course-counseling',
+        anchor: 'course-counseling',
+      },
+      'scholarship-guidance': {
+        title: 'Scholarship Guidance Service | Aao College',
+        description: 'Identify eligible scholarships and receive support for scholarship applications and financial planning.',
+        keywords: ['scholarship guidance', 'education scholarship', 'financial aid counseling'],
+        canonicalPath: '/services/scholarship-guidance',
+        anchor: 'scholarship-guidance',
+      },
+      'entrance-exam-prep': {
+        title: 'Entrance Exam Prep Guidance | Aao College',
+        description: 'Get structured guidance for entrance exam planning, strategy, mock tests, and score improvement.',
+        keywords: ['entrance exam prep', 'exam preparation guidance', 'college entrance coaching support'],
+        canonicalPath: '/services/entrance-exam-prep',
+        anchor: 'entrance-exam-prep',
+      },
+    }),
+    []
+  );
+
+  const selectedService = serviceSlug ? serviceLandingSeo[serviceSlug] : null;
+  const pageSeo = selectedService
+    ? {
+      ...selectedService,
+      keywords: [...STATIC_PAGE_SEO.services.keywords, ...(selectedService.keywords || [])],
+    }
+    : STATIC_PAGE_SEO.services;
 
   const services = [
     // ✅ USP 1 added (Loan services)
@@ -118,12 +169,38 @@ const ServicesPage = () => {
     
   ];
 
+  useEffect(() => {
+    if (!selectedService?.anchor) return;
+    const el = document.getElementById(selectedService.anchor);
+    if (!el) return;
+    const timer = setTimeout(() => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 120);
+    return () => clearTimeout(timer);
+  }, [selectedService?.anchor]);
+
+  const serviceSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Aao College Services',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'College Search', url: 'https://aaocollege.com/services/college-search' },
+      { '@type': 'ListItem', position: 2, name: 'Admission Consulting', url: 'https://aaocollege.com/services/admission-consulting' },
+      { '@type': 'ListItem', position: 3, name: 'Course Counseling', url: 'https://aaocollege.com/services/course-counseling' },
+      { '@type': 'ListItem', position: 4, name: 'Scholarship Guidance', url: 'https://aaocollege.com/services/scholarship-guidance' },
+      { '@type': 'ListItem', position: 5, name: 'Entrance Exam Prep', url: 'https://aaocollege.com/services/entrance-exam-prep' },
+    ],
+  };
+
   return (
     <>
-      <Helmet>
-        <title>Our Services - Aao College</title>
-        <meta name="description" content="Explore Aao College's comprehensive services including college search, admission consulting, personalized counseling, scholarship guidance, and entrance exam preparation." />
-      </Helmet>
+      <SeoHead
+        title={pageSeo.title}
+        description={pageSeo.description}
+        keywords={pageSeo.keywords}
+        canonicalPath={pageSeo.canonicalPath}
+        jsonLd={serviceSchema}
+      />
 
       <div className="bg-gradient-to-b from-blue-50 to-white">
         <section className="py-16 md:py-24">
@@ -150,6 +227,19 @@ const ServicesPage = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
+                  id={
+                    service.title === 'College Search & Selection'
+                      ? 'college-search'
+                      : service.title === 'Admission Consulting'
+                        ? 'admission-consulting'
+                        : service.title === 'Personalized Counseling'
+                          ? 'course-counseling'
+                          : service.title === 'Scholarship Guidance'
+                            ? 'scholarship-guidance'
+                            : service.title === 'Entrance Exam Guidance'
+                              ? 'entrance-exam-prep'
+                              : undefined
+                  }
                   className="bg-white rounded-2xl shadow-xl overflow-hidden"
                 >
                   <div className="grid md:grid-cols-2 gap-8">

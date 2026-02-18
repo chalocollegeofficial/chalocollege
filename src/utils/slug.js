@@ -103,6 +103,11 @@ export const createCollegeSlug = (college) => {
   return token ? `${base}-${token}` : `${base}-${id}`;
 };
 
+export const createBlogSlug = (blog) => {
+  const slugCandidate = blog?.slug || blog?.title || '';
+  return slugify(slugCandidate);
+};
+
 /**
  * Extracts the college UUID from:
  * - old format: "{name}-{uuid}"

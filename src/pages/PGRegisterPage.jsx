@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Loader2, Upload, Home, ShieldCheck } from 'lucide-react';
+import SeoHead from '@/components/common/SeoHead';
+import { STATIC_PAGE_SEO } from '@/lib/seo';
 
 // Vendor / PG Owner: submit a PG listing for admin approval.
 // NOTE: Admin approval requires adding approval columns in Supabase (see README in assistant response).
 const PGRegisterPage = () => {
+  const pageSeo = STATIC_PAGE_SEO.pgRegister;
   const { toast } = useToast();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -173,13 +175,12 @@ const PGRegisterPage = () => {
 
   return (
     <>
-      <Helmet>
-        <title>List Your PG - Aao College</title>
-        <meta
-          name="description"
-          content="PG owners/vendors can submit their PG for listing. After verification, it will appear on the Get PG page."
-        />
-      </Helmet>
+      <SeoHead
+        title={pageSeo.title}
+        description={pageSeo.description}
+        keywords={pageSeo.keywords}
+        canonicalPath={pageSeo.canonicalPath}
+      />
 
       <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
         <section className="py-10">

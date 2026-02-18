@@ -33,7 +33,10 @@ const AdminPGListings = () => {
     facilities: '',
     contact_number: '',
     images: [],
-    video_url: ''
+    video_url: '',
+    meta_title: '',
+    meta_description: '',
+    meta_keywords: '',
   });
 
   // ✅ lock body scroll when dialog is open
@@ -135,7 +138,10 @@ const AdminPGListings = () => {
       facilities: '',
       contact_number: '',
       images: [],
-      video_url: ''
+      video_url: '',
+      meta_title: '',
+      meta_description: '',
+      meta_keywords: '',
     });
   };
 
@@ -214,7 +220,10 @@ const AdminPGListings = () => {
       contact_number: pg.contact_number || '',
       images: parsedImages,
       facilities: Array.isArray(pg.facilities) ? pg.facilities.join(', ') : (pg.facilities || ''),
-      video_url: pg.video_url || ''
+      video_url: pg.video_url || '',
+      meta_title: pg.meta_title || '',
+      meta_description: pg.meta_description || '',
+      meta_keywords: pg.meta_keywords || '',
     });
 
     setIsDialogOpen(true);
@@ -223,6 +232,9 @@ const AdminPGListings = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    const hasManualSeo = [formData.meta_title, formData.meta_description, formData.meta_keywords]
+      .some((value) => String(value || '').trim() !== '');
+    let seoColumnsMissing = false;
 
     try {
       const facilitiesArray = formData.facilities
@@ -237,8 +249,16 @@ const AdminPGListings = () => {
         contact_number: formData.contact_number,
         images: JSON.stringify(formData.images),
         facilities: facilitiesArray,
-        video_url: formData.video_url
+        video_url: formData.video_url,
+        meta_title: (formData.meta_title || '').trim() || null,
+        meta_description: (formData.meta_description || '').trim() || null,
+        meta_keywords: (formData.meta_keywords || '').trim() || null,
       };
+      const basePayloadWithoutSeo = Object.fromEntries(
+        Object.entries(basePayload).filter(
+          ([key]) => !['meta_title', 'meta_description', 'meta_keywords'].includes(key)
+        )
+      );
 
       // Admin-created listings should be visible immediately.
       // We try several common approval column patterns so it works with different Supabase schemas.
@@ -264,6 +284,21 @@ const AdminPGListings = () => {
             lastError = null;
             break;
           }
+
+          if (/meta_title|meta_description|meta_keywords/i.test(error.message || '')) {
+            seoColumnsMissing = true;
+            const { error: fallbackError } = await supabase
+              .from('pg_listings')
+              .update({ ...basePayloadWithoutSeo, ...extra })
+              .eq('id', formData.id);
+            if (!fallbackError) {
+              lastError = null;
+              break;
+            }
+            lastError = fallbackError;
+            continue;
+          }
+
           lastError = error;
         }
         if (lastError) throw lastError;
@@ -276,12 +311,33 @@ const AdminPGListings = () => {
             lastError = null;
             break;
           }
+
+          if (/meta_title|meta_description|meta_keywords/i.test(error.message || '')) {
+            seoColumnsMissing = true;
+            const { error: fallbackError } = await supabase
+              .from('pg_listings')
+              .insert([{ ...basePayloadWithoutSeo, ...extra }]);
+            if (!fallbackError) {
+              lastError = null;
+              break;
+            }
+            lastError = fallbackError;
+            continue;
+          }
+
           lastError = error;
         }
         if (lastError) throw lastError;
       }
 
       toast({ title: 'Success', description: 'PG listing saved successfully' });
+      if (seoColumnsMissing && hasManualSeo) {
+        toast({
+          variant: 'destructive',
+          title: 'SEO fields not saved',
+          description: 'Run SQL migration to add meta_title/meta_description/meta_keywords columns in pg_listings table.',
+        });
+      }
 
       await fetchListings();
       setIsDialogOpen(false);
@@ -460,6 +516,34 @@ const AdminPGListings = () => {
                       placeholder="https://youtube.com/watch?v=..."
                     />
                     <p className="text-xs text-gray-500 mt-1">Paste full YouTube link.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">SEO Title</label>
+                      <Input
+                        value={formData.meta_title}
+                        onChange={e => setFormData({ ...formData, meta_title: e.target.value })}
+                        placeholder="Custom title for search result"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">SEO Keywords</label>
+                      <Input
+                        value={formData.meta_keywords}
+                        onChange={e => setFormData({ ...formData, meta_keywords: e.target.value })}
+                        placeholder="pg near college, hostel..."
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">SEO Description</label>
+                    <Textarea
+                      value={formData.meta_description}
+                      onChange={e => setFormData({ ...formData, meta_description: e.target.value })}
+                      placeholder="Custom meta description for listing page"
+                    />
                   </div>
 
                   <div className="flex justify-end pt-2">

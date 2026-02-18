@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/customSupabaseClient';
+import { createBlogSlug } from '@/utils/slug';
 
 // A thin, scrolling "Latest News" bar (marquee-style)
 // Pulls latest blog posts from Supabase and scrolls them continuously.
@@ -15,7 +16,7 @@ const NewsTicker = () => {
       try {
         const { data, error } = await supabase
           .from('blogs')
-          .select('id,title')
+          .select('id,title,slug')
           .order('created_at', { ascending: false })
           .limit(10);
 
@@ -67,7 +68,7 @@ const NewsTicker = () => {
               {doubledItems.map((post, idx) => (
                 <React.Fragment key={`${post.id}-${idx}`}>
                   <Link
-                    to={`/blog/${post.id}`}
+                    to={`/blog/${createBlogSlug(post)}/${post.id}`}
                     className="inline-flex items-center text-xs md:text-sm hover:underline hover:text-white/90 px-4"
                     title={post.title}
                   >

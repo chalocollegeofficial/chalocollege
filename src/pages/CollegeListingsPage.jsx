@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { Search, Filter, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,8 +7,11 @@ import FilterSidebar from '@/components/colleges/FilterSidebar';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useLocation } from 'react-router-dom';
 import { collegeMatchesCourseCategory, getCourseCategoryByKey } from '@/lib/courseCategories';
+import SeoHead from '@/components/common/SeoHead';
+import { STATIC_PAGE_SEO } from '@/lib/seo';
 
 const CollegeListingsPage = () => {
+  const pageSeo = STATIC_PAGE_SEO.colleges;
   const [showFilters, setShowFilters] = useState(false);
   const [colleges, setColleges] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -132,10 +134,12 @@ const CollegeListingsPage = () => {
 
   return (
     <>
-      <Helmet>
-        <title>College Listings - Aao College</title>
-        <meta name="description" content="Browse and compare top colleges. Filter by course, state and more." />
-      </Helmet>
+      <SeoHead
+        title={pageSeo.title}
+        description={pageSeo.description}
+        keywords={pageSeo.keywords}
+        canonicalPath={pageSeo.canonicalPath}
+      />
 
       <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
         <section className="py-8 bg-white shadow-sm sticky top-16 z-40">

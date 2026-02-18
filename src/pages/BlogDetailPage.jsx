@@ -1,14 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/customSupabaseClient';
 import { Calendar, User, ArrowLeft, Clock, Share2, ThumbsUp, MessageSquare, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import SeoHead from '@/components/common/SeoHead';
+import {
+  autoDescriptionFromText,
+  extractKeywordsFromText,
+  pickSeoDescription,
+  pickSeoKeywords,
+  pickSeoTitle,
+  stripHtml,
+} from '@/lib/seo';
+import { createBlogSlug } from '@/utils/slug';
+
+const truncateTitle = (value = '', max = 58) => {
+  const clean = String(value || '').replace(/\s+/g, ' ').trim();
+  if (!clean) return '';
+  if (clean.length <= max) return clean;
+  return `${clean.slice(0, max - 1).trimEnd()}…`;
+};
 
 const BlogDetailPage = () => {
-  const { id } = useParams();
+  const { id: legacyId, blogId, blogSlug } = useParams();
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
@@ -20,6 +36,7 @@ const BlogDetailPage = () => {
   const [newCommentName, setNewCommentName] = useState('');
   const [newCommentText, setNewCommentText] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
+  const resolvedId = blogId || legacyId;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -28,7 +45,7 @@ const BlogDetailPage = () => {
         const { data: postData, error: postError } = await supabase
           .from('blogs')
           .select('*')
-          .eq('id', id)
+          .eq('id', resolvedId)
           .single();
         
         if (postError) throw postError;
@@ -37,7 +54,7 @@ const BlogDetailPage = () => {
 
         // Check local storage for like status
         const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
-        if (likedPosts.includes(id)) {
+        if (likedPosts.includes(resolvedId)) {
           setHasLiked(true);
         }
 
@@ -45,7 +62,7 @@ const BlogDetailPage = () => {
         const { data: commentsData, error: commentsError } = await supabase
           .from('blog_comments')
           .select('*')
-          .eq('blog_id', id)
+          .eq('blog_id', resolvedId)
           .eq('status', 'approved')
           .order('created_at', { ascending: false });
 
@@ -60,7 +77,80 @@ const BlogDetailPage = () => {
     };
 
     fetchData();
-  }, [id]);
+  }, [resolvedId]);
+
+  useEffect(() => {
+    if (!post?.id) return;
+    const canonicalSlug = createBlogSlug(post);
+    const expectedPath = `/blog/${canonicalSlug}/${post.id}`;
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : expectedPath;
+    if (currentPath !== expectedPath) {
+      navigate(expectedPath, { replace: true });
+    }
+  }, [blogId, blogSlug, navigate, post]);
+
+  const canonicalPath = useMemo(
+    () => (post?.id ? `/blog/${createBlogSlug(post)}/${post.id}` : '/blog'),
+    [post]
+  );
+
+  const blogContentText = useMemo(
+    () => `${post?.title || ''} ${post?.short_description || ''} ${stripHtml(post?.full_content || '')}`,
+    [post]
+  );
+
+  const autoKeywords = useMemo(
+    () => extractKeywordsFromText(blogContentText, { limit: 10, minLength: 4 }),
+    [blogContentText]
+  );
+
+  const seoTitle = useMemo(
+    () =>
+      pickSeoTitle(
+        post?.meta_title,
+        `${post?.title || truncateTitle(post?.short_description) || 'Blog'} - Aao College Blog`
+      ),
+    [post]
+  );
+
+  const seoDescription = useMemo(
+    () =>
+      pickSeoDescription(
+        post?.meta_description,
+        autoDescriptionFromText(post?.short_description || '', stripHtml(post?.full_content || ''), 170)
+      ),
+    [post]
+  );
+
+  const seoKeywords = useMemo(
+    () =>
+      pickSeoKeywords(post?.meta_keywords, [
+        post?.title,
+        post?.category,
+        ...autoKeywords,
+        'college admission blog',
+        'career guidance',
+      ]),
+    [autoKeywords, post]
+  );
+
+  const articleSchema = useMemo(() => {
+    if (!post?.id) return null;
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: post.title,
+      description: seoDescription,
+      author: {
+        '@type': 'Person',
+        name: post.author || 'Aao College Team',
+      },
+      datePublished: post.created_at,
+      dateModified: post.updated_at || post.created_at,
+      mainEntityOfPage: `https://aaocollege.com${canonicalPath}`,
+      image: post.image || 'https://aaocollege.com/og-banner.jpg',
+    };
+  }, [canonicalPath, post, seoDescription]);
 
   const handleLike = async () => {
     if (hasLiked) return;
@@ -72,13 +162,13 @@ const BlogDetailPage = () => {
 
       // Save to local storage to persist state locally
       const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
-      localStorage.setItem('liked_posts', JSON.stringify([...likedPosts, id]));
+      localStorage.setItem('liked_posts', JSON.stringify([...likedPosts, resolvedId]));
 
       // Update Database
       const { error } = await supabase
         .from('blogs')
         .update({ likes_count: newCount })
-        .eq('id', id);
+        .eq('id', resolvedId);
 
       if (error) throw error;
 
@@ -99,7 +189,7 @@ const BlogDetailPage = () => {
       const { error } = await supabase
         .from('blog_comments')
         .insert([{
-          blog_id: id,
+          blog_id: resolvedId,
           user_name: newCommentName,
           comment_text: newCommentText,
           status: 'pending' // Default status
@@ -146,10 +236,15 @@ const BlogDetailPage = () => {
 
   return (
     <>
-      <Helmet>
-        <title>{post.title} - Aao College Blog</title>
-        <meta name="description" content={post.short_description} />
-      </Helmet>
+      <SeoHead
+        title={seoTitle}
+        description={seoDescription}
+        keywords={seoKeywords}
+        canonicalPath={canonicalPath}
+        ogType="article"
+        ogImage={post.image || '/og-banner.jpg'}
+        jsonLd={articleSchema}
+      />
 
       <div className="bg-white min-h-screen pb-16">
         {/* Hero Image */}

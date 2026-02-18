@@ -30,6 +30,9 @@ const AdminBlogs = () => {
     title: '',
     short_description: '',
     full_content: '',
+    meta_title: '',
+    meta_description: '',
+    meta_keywords: '',
     author: '',
     category: '',
     is_published: true,
@@ -134,30 +137,66 @@ const AdminBlogs = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    const hasManualSeo = [formData.meta_title, formData.meta_description, formData.meta_keywords]
+      .some((value) => String(value || '').trim() !== '');
+    let seoColumnsMissing = false;
     
     const payload = {
       title: formData.title,
       slug: formData.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
       short_description: formData.short_description,
       full_content: formData.full_content,
+      meta_title: formData.meta_title || null,
+      meta_description: formData.meta_description || null,
+      meta_keywords: formData.meta_keywords || null,
       author: formData.author,
       category: formData.category,
       is_published: formData.is_published,
       image: formData.image,
       images: JSON.stringify(formData.images)
     };
+    const payloadWithoutSeo = Object.fromEntries(
+      Object.entries(payload).filter(
+        ([key]) => !['meta_title', 'meta_description', 'meta_keywords'].includes(key)
+      )
+    );
 
     let error;
     if (editingId) {
       const { error: err } = await supabase.from('blogs').update(payload).eq('id', editingId);
       error = err;
+
+      if (
+        error &&
+        /meta_title|meta_description|meta_keywords/i.test(error.message || '')
+      ) {
+        seoColumnsMissing = true;
+        const { error: fallbackErr } = await supabase.from('blogs').update(payloadWithoutSeo).eq('id', editingId);
+        error = fallbackErr;
+      }
     } else {
       const { error: err } = await supabase.from('blogs').insert([payload]);
       error = err;
+
+      if (
+        error &&
+        /meta_title|meta_description|meta_keywords/i.test(error.message || '')
+      ) {
+        seoColumnsMissing = true;
+        const { error: fallbackErr } = await supabase.from('blogs').insert([payloadWithoutSeo]);
+        error = fallbackErr;
+      }
     }
 
     if (!error) {
       toast({ title: editingId ? "Updated successfully" : "Created successfully" });
+      if (seoColumnsMissing && hasManualSeo) {
+        toast({
+          variant: 'destructive',
+          title: 'SEO fields not saved',
+          description: 'Run SQL migration to add meta_title/meta_description/meta_keywords columns in blogs table.',
+        });
+      }
       fetchPosts();
       setIsDialogOpen(false);
       resetForm();
@@ -192,6 +231,9 @@ const AdminBlogs = () => {
       title: post.title || '',
       short_description: post.short_description || '',
       full_content: post.full_content || '',
+      meta_title: post.meta_title || '',
+      meta_description: post.meta_description || '',
+      meta_keywords: post.meta_keywords || '',
       author: post.author || '',
       category: post.category || '',
       is_published: post.is_published ?? true,
@@ -241,6 +283,9 @@ const AdminBlogs = () => {
         title: '', 
         short_description: '', 
         full_content: '', 
+        meta_title: '',
+        meta_description: '',
+        meta_keywords: '',
         author: '', 
         category: '',
         is_published: true, 
@@ -363,6 +408,38 @@ const AdminBlogs = () => {
               <div>
                 <label className="block text-sm font-medium mb-1">Short Description (SEO)</label>
                 <textarea required rows={2} className="w-full p-2 border rounded" value={formData.short_description} onChange={e => setFormData({...formData, short_description: e.target.value})} placeholder="Brief summary for list view and meta description..."/>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">SEO Title</label>
+                  <input
+                    className="w-full p-2 border rounded"
+                    value={formData.meta_title}
+                    onChange={e => setFormData({ ...formData, meta_title: e.target.value })}
+                    placeholder="Custom title for search results (optional)"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">SEO Keywords</label>
+                  <input
+                    className="w-full p-2 border rounded"
+                    value={formData.meta_keywords}
+                    onChange={e => setFormData({ ...formData, meta_keywords: e.target.value })}
+                    placeholder="college admission, exams, career..."
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">SEO Description</label>
+                <textarea
+                  rows={2}
+                  className="w-full p-2 border rounded"
+                  value={formData.meta_description}
+                  onChange={e => setFormData({ ...formData, meta_description: e.target.value })}
+                  placeholder="Custom meta description (optional)"
+                />
               </div>
               
               <div>
