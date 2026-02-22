@@ -6,7 +6,7 @@ import CollegeCard from '@/components/colleges/CollegeCard';
 import FilterSidebar from '@/components/colleges/FilterSidebar';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useLocation } from 'react-router-dom';
-import { collegeMatchesCourseCategory, getCourseCategoryByKey } from '@/lib/courseCategories';
+import { collegeMatchesCourseCategory, getCollegeCourseNames, getCourseCategoryByKey } from '@/lib/courseCategories';
 import SeoHead from '@/components/common/SeoHead';
 import { STATIC_PAGE_SEO } from '@/lib/seo';
 
@@ -71,16 +71,6 @@ const CollegeListingsPage = () => {
     }));
   };
 
-  const getCoursesArray = (coursesData) => {
-    if (!coursesData) return [];
-    if (Array.isArray(coursesData)) return coursesData;
-    if (typeof coursesData === 'string') {
-      if (coursesData.includes(',')) return coursesData.split(',').map((c) => c.trim());
-      return [coursesData];
-    }
-    return [];
-  };
-
   // ✅ Build a dynamic list of cities for the sidebar filter
   const cities = React.useMemo(() => {
     const unique = new Set();
@@ -112,7 +102,7 @@ const CollegeListingsPage = () => {
 
     if (filters.course) {
       const filterCourse = filters.course.toLowerCase();
-      const courses = getCoursesArray(college.courses_offered);
+      const courses = getCollegeCourseNames(college);
       const hasCourse = courses.some((c) => c.toLowerCase().includes(filterCourse));
       if (!hasCourse) return false;
     }

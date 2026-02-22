@@ -6,11 +6,13 @@ import LeadPopup from '@/components/LeadPopup';
 import ImageGallery from '@/components/common/ImageGallery';
 import { useSubmissionLock } from '@/utils/useSubmissionLock';
 import { createCollegeSlug } from '@/utils/slug';
+import { getCollegeCourseNames } from '@/lib/courseCategories';
 
 const CollegeCard = ({ college }) => {
   const navigate = useNavigate();
   const [showLeadPopup, setShowLeadPopup] = useState(false);
   const { hasSubmitted } = useSubmissionLock('lead-global', 180);
+  const displayCourses = getCollegeCourseNames(college).slice(0, 4);
 
   const formatCategory = (value) => {
     if (!value) return 'N/A';
@@ -105,8 +107,8 @@ const CollegeCard = ({ college }) => {
             <div className="mb-4">
               <p className="text-sm text-gray-500 mb-2">Courses Offered:</p>
               <div className="flex flex-wrap gap-2">
-                {Array.isArray(college.courses_offered) ? (
-                  college.courses_offered.slice(0, 4).map((course, index) => (
+                {displayCourses.length > 0 ? (
+                  displayCourses.map((course, index) => (
                     <span
                       key={index}
                       className="bg-blue-100 text-blue-600 px-3 py-1 rounded-lg text-sm font-medium"

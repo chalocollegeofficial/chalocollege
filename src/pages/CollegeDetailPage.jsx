@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import {
   MapPin,
   IndianRupee,
-  Clock,
   Star,
   TrendingUp,
   Award,
@@ -469,6 +468,12 @@ const CollegeDetailPage = () => {
     (collegeData?.description || '').trim().length > 0 &&
     (collegeData?.description || '').trim() !== (collegeData?.brief_description || '').trim();
 
+  const rankingText = String(collegeData?.ranking ?? '').trim();
+  const rankingStatText = /^\d+([./-]\d+)?$/.test(rankingText) ? `#${rankingText}` : rankingText || 'N/A';
+  const feeRangeText = String(collegeData?.fee_range ?? '').trim() || 'N/A';
+  const affiliationText = String(collegeData?.affiliation ?? '').trim() || 'N/A';
+  const hasCollegeBrochure = hasBrochure(collegeData?.brochure_url);
+
   if (loading)
     return (
       <div className="h-screen flex items-center justify-center">
@@ -519,57 +524,62 @@ const CollegeDetailPage = () => {
                   />
                 </div>
 
-                <div className="p-8">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h1 className="text-3xl font-bold text-gray-900 mb-2">{collegeData.college_name}</h1>
-                      <div className="flex items-center text-gray-600 mb-4">
-                        <MapPin className="h-5 w-5 mr-2" />
-                        <span>{collegeData.city}</span>
+                <div className="p-6 md:p-8">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-5">
+                    <div className="min-w-0">
+                      <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2 leading-tight">{collegeData.college_name}</h1>
+                      <div className="flex items-center text-slate-600 mb-1">
+                        <MapPin className="h-4 w-4 md:h-5 md:w-5 mr-2 shrink-0" />
+                        <span className="font-medium">{collegeData.city}</span>
                       </div>
                     </div>
-                    <div className="flex items-center bg-yellow-100 px-4 py-2 rounded-lg h-fit">
-                      <Star className="h-5 w-5 text-yellow-600 mr-2 fill-current" />
-                      <span className="font-bold text-yellow-600 text-lg">{collegeData.ranking}</span>
+                    <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 px-3.5 py-2 rounded-xl h-fit shrink-0">
+                      <Star className="h-4 w-4 text-amber-600 fill-current" />
+                      <span className="font-semibold text-amber-700 text-sm md:text-base">{rankingText || 'N/A'}</span>
                     </div>
                   </div>
 
                   {collegeData.brief_description && (
-                    <p className="text-gray-700 mb-4 leading-relaxed max-h-24 overflow-hidden">
+                    <p className="text-slate-700 mb-6 leading-7 line-clamp-3">
                       {collegeData.brief_description}
                     </p>
                   )}
 
-                  <div className="grid grid-cols-3 gap-4 mb-6">
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <TrendingUp className="h-6 w-6 text-blue-600 mb-2" />
-                      <p className="text-sm text-gray-600">Ranking</p>
-                      <p className="text-xl font-bold text-gray-900">#{collegeData.ranking || 'N/A'}</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-5">
+                    <div className="rounded-lg border border-blue-100 bg-blue-50/80 px-4 py-3 min-h-[104px]">
+                      <div className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-blue-100 text-blue-700">
+                        <TrendingUp className="h-4 w-4" />
+                      </div>
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-600 mt-2.5">Ranking</p>
+                      <p className="text-base md:text-lg font-bold text-slate-900 mt-1 leading-snug break-words">{rankingStatText}</p>
                     </div>
-                    <div className="bg-green-50 p-4 rounded-lg">
-                      <IndianRupee className="h-6 w-6 text-green-600 mb-2" />
-                      <p className="text-sm text-gray-600">Fees</p>
-                      <p className="text-xl font-bold text-gray-900">{collegeData.fee_range || 'N/A'}</p>
+                    <div className="rounded-lg border border-emerald-100 bg-emerald-50/80 px-4 py-3 min-h-[104px]">
+                      <div className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-emerald-100 text-emerald-700">
+                        <IndianRupee className="h-4 w-4" />
+                      </div>
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-600 mt-2.5">Fees</p>
+                      <p className="text-base md:text-lg font-bold text-slate-900 mt-1 leading-snug break-words">{feeRangeText}</p>
                     </div>
-                    <div className="bg-purple-50 p-4 rounded-lg">
-                      <Clock className="h-6 w-6 text-purple-600 mb-2" />
-                      <p className="text-sm text-gray-600">Affiliation</p>
-                      <p className="text-xl font-bold text-gray-900">{collegeData.affiliation || 'N/A'}</p>
+                    <div className="rounded-lg border border-amber-100 bg-amber-50/80 px-4 py-3 min-h-[104px]">
+                      <div className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-amber-100 text-amber-700">
+                        <Award className="h-4 w-4" />
+                      </div>
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-600 mt-2.5">Affiliation</p>
+                      <p className="text-base md:text-lg font-bold text-slate-900 mt-1 leading-snug break-words">{affiliationText}</p>
                     </div>
                   </div>
 
-                  {/* ✅ Apply Now | Brochure | Get Counseling */}
-                  <div className="flex gap-3">
-                    <Button onClick={() => navigate('/contact')} className="flex-1 bg-blue-600 hover:bg-blue-700">
+                  <div className={`grid gap-3 ${hasCollegeBrochure ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
+                    <Button onClick={() => navigate('/contact')} className="w-full bg-blue-600 hover:bg-blue-700">
                       Apply Now
                     </Button>
 
-                    {hasBrochure(collegeData.brochure_url) && (
+                    {hasCollegeBrochure && (
                       <Button
                         type="button"
                         onClick={handleDownloadBrochure}
                         variant="outline"
-                        className="flex-1 border-gray-300"
+                        className="w-full border-slate-300 text-slate-700 hover:bg-slate-50"
                         disabled={isBrochureDownloading}
                         title="Download brochure PDF"
                       >
@@ -590,14 +600,14 @@ const CollegeDetailPage = () => {
                     <Button
                       onClick={() => navigate('/contact')}
                       variant="outline"
-                      className="flex-1 border-blue-600 text-blue-600 hover:bg-blue-50"
+                      className="w-full border-blue-200 text-blue-700 hover:bg-blue-50"
                     >
                       Get Counseling
                     </Button>
                   </div>
 
-                  {hasBrochure(collegeData.brochure_url) && (
-                    <p className="text-xs text-gray-500 mt-2">Brochure will download automatically (PDF).</p>
+                  {hasCollegeBrochure && (
+                    <p className="text-xs text-slate-500 mt-2">Brochure will download automatically (PDF).</p>
                   )}
                 </div>
               </div>
@@ -609,7 +619,7 @@ const CollegeDetailPage = () => {
                 <div>
                   <h2 className="text-xl md:text-2xl font-bold text-gray-900">Courses & Fees</h2>
                   <p className="text-sm text-gray-600 mt-1">
-                    View all courses in a dedicated page (best for SEO & sharing).
+                    Explore complete course details with fee structure, duration, and specializations in one place.
                   </p>
                 </div>
 

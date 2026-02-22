@@ -2,19 +2,19 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://aaocollege.com/</loc>
-    <lastmod>2026-02-18</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://aaocollege.com/about</loc>
-    <lastmod>2026-02-18</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://aaocollege.com/blog</loc>
-    <lastmod>2026-02-18</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -272,7 +272,7 @@
   </url>
   <url>
     <loc>https://aaocollege.com/colleges</loc>
-    <lastmod>2026-02-18</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2353,6 +2353,24 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://aaocollege.com/colleges/its-group-3nlipsnf9v96k32t2zap18nns/courses/computer-applications-ug-2</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/its-group-3nlipsnf9v96k32t2zap18nns/courses/engineering-technology-ug-0</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/its-group-3nlipsnf9v96k32t2zap18nns/courses/management-pg-1</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://aaocollege.com/colleges/jaipuria-institute-of-management-1fql58abr269zvslpb2kc04b6</loc>
     <lastmod>2026-01-25</lastmod>
     <changefreq>weekly</changefreq>
@@ -2581,16 +2599,40 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://aaocollege.com/colleges/mangalmay-institute-8llehiyqg2lg3wqflb3mw4b6x</loc>
+    <loc>https://aaocollege.com/colleges/mangalmay-group-of-institutions-8llehiyqg2lg3wqflb3mw4b6x</loc>
     <lastmod>2026-01-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://aaocollege.com/colleges/mangalmay-institute-8llehiyqg2lg3wqflb3mw4b6x/courses</loc>
+    <loc>https://aaocollege.com/colleges/mangalmay-group-of-institutions-8llehiyqg2lg3wqflb3mw4b6x/courses</loc>
     <lastmod>2026-01-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/mangalmay-group-of-institutions-8llehiyqg2lg3wqflb3mw4b6x/courses/computer-applications-ug-2</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/mangalmay-group-of-institutions-8llehiyqg2lg3wqflb3mw4b6x/courses/engineering-technology-ug-0</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/mangalmay-group-of-institutions-8llehiyqg2lg3wqflb3mw4b6x/courses/management-business-administration-pg-3</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/mangalmay-group-of-institutions-8llehiyqg2lg3wqflb3mw4b6x/courses/management-business-administration-ug-1</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://aaocollege.com/colleges/metro-college-of-health-sciences-research-3xi4v6dqbaywss2u7x6srdy29</loc>
@@ -2605,6 +2647,30 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://aaocollege.com/colleges/metro-college-of-health-sciences-research-3xi4v6dqbaywss2u7x6srdy29/courses/nursing-pg-2</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/metro-college-of-health-sciences-research-3xi4v6dqbaywss2u7x6srdy29/courses/nursing-ug-0</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/metro-college-of-health-sciences-research-3xi4v6dqbaywss2u7x6srdy29/courses/paramedical-ug-1</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/metro-college-of-health-sciences-research-3xi4v6dqbaywss2u7x6srdy29/courses/pharmacy-pg-3</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://aaocollege.com/colleges/mgm-college-of-engineering-technology-5gg1bd7181xgm3cldo00mrddb</loc>
     <lastmod>2026-01-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -2615,6 +2681,30 @@
     <lastmod>2026-01-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/mgm-college-of-engineering-technology-5gg1bd7181xgm3cldo00mrddb/courses/computer-applications-pg-2</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/mgm-college-of-engineering-technology-5gg1bd7181xgm3cldo00mrddb/courses/engineering-technology-ug-0</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/mgm-college-of-engineering-technology-5gg1bd7181xgm3cldo00mrddb/courses/engineering-technology-ug-3</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/mgm-college-of-engineering-technology-5gg1bd7181xgm3cldo00mrddb/courses/management-pg-1</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://aaocollege.com/colleges/national-institute-of-management-and-technology-nimt-1g352376vr991eci3pntsmvmm</loc>
@@ -2629,6 +2719,66 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://aaocollege.com/colleges/national-institute-of-management-and-technology-nimt-1g352376vr991eci3pntsmvmm/courses/computer-science-ug-3</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/national-institute-of-management-and-technology-nimt-1g352376vr991eci3pntsmvmm/courses/education-pg-8</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/national-institute-of-management-and-technology-nimt-1g352376vr991eci3pntsmvmm/courses/law-pg-9</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/national-institute-of-management-and-technology-nimt-1g352376vr991eci3pntsmvmm/courses/law-ug-5</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/national-institute-of-management-and-technology-nimt-1g352376vr991eci3pntsmvmm/courses/management-pg-6</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/national-institute-of-management-and-technology-nimt-1g352376vr991eci3pntsmvmm/courses/management-ug-4</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/national-institute-of-management-and-technology-nimt-1g352376vr991eci3pntsmvmm/courses/nursing-ug-1</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/national-institute-of-management-and-technology-nimt-1g352376vr991eci3pntsmvmm/courses/paramedical-sciences-pg-7</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/national-institute-of-management-and-technology-nimt-1g352376vr991eci3pntsmvmm/courses/paramedical-sciences-ug-0</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/national-institute-of-management-and-technology-nimt-1g352376vr991eci3pntsmvmm/courses/pharmacy-ug-2</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://aaocollege.com/colleges/noida-institute-of-engineering-technology-niet-bp639hgl6mlkqdwu1l7l6os10</loc>
     <lastmod>2026-01-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -2639,6 +2789,30 @@
     <lastmod>2026-01-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-institute-of-engineering-technology-niet-bp639hgl6mlkqdwu1l7l6os10/courses/computer-applications-pg-2</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-institute-of-engineering-technology-niet-bp639hgl6mlkqdwu1l7l6os10/courses/engineering-technology-ug-0</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-institute-of-engineering-technology-niet-bp639hgl6mlkqdwu1l7l6os10/courses/engineering-technology-ug-3</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-institute-of-engineering-technology-niet-bp639hgl6mlkqdwu1l7l6os10/courses/management-pg-1</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to</loc>
@@ -2653,6 +2827,150 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/allied-health-pg-ug-22</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/allied-health-ug-12</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/commerce-pg-pg-16</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/computer-applications-ug-19</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/computer-applications-ug-7</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/doctoral-doctoral-programs-23</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/education-ug-10</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/engineering-technology-diploma-programs-1</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/engineering-technology-pg-14</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/engineering-technology-ug-0</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/fine-arts-design-ug-21</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/fine-arts-design-ug-9</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/journalism-mass-comm-pg-17</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/journalism-mass-comm-ug-5</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/law-ug-4</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/liberal-arts-ug-20</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/liberal-arts-ug-8</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/management-commerce-ug-2</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/management-pg-pg-15</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/management-ug-3</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/nursing-ug-13</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/pharmacy-ug-11</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/sciences-ug-18</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/noida-international-university-niu-344x9lcu3ipaicslm5x1y93to/courses/sciences-ug-6</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://aaocollege.com/colleges/orlean-college-of-pharmacy-4fdyhqw8oji12mwrv30ekr1ng</loc>
     <lastmod>2026-01-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -2665,6 +2983,18 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://aaocollege.com/colleges/orlean-college-of-pharmacy-4fdyhqw8oji12mwrv30ekr1ng/courses/pharmacy-ug-0</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/orlean-college-of-pharmacy-4fdyhqw8oji12mwrv30ekr1ng/courses/pharmacy-ug-1</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://aaocollege.com/colleges/prince-institute-of-innovative-technology-piit-40ozotsp07dz6b97qffs4e2t1</loc>
     <lastmod>2026-01-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -2675,6 +3005,30 @@
     <lastmod>2026-01-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/prince-institute-of-innovative-technology-piit-40ozotsp07dz6b97qffs4e2t1/courses/computer-applications-pg-2</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/prince-institute-of-innovative-technology-piit-40ozotsp07dz6b97qffs4e2t1/courses/engineering-technology-ug-0</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/prince-institute-of-innovative-technology-piit-40ozotsp07dz6b97qffs4e2t1/courses/engineering-technology-ug-3</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/prince-institute-of-innovative-technology-piit-40ozotsp07dz6b97qffs4e2t1/courses/management-pg-1</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://aaocollege.com/colleges/school-of-management-sciences-sms-4j74sv57n1cjz8mcjr18hcdd0</loc>
@@ -3013,6 +3367,84 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://aaocollege.com/colleges/shiv-nadar-university-5tfrf4ciagkxgu2uwkh7jcm0q/courses/arts-humanities-sciences-pg-11</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/shiv-nadar-university-5tfrf4ciagkxgu2uwkh7jcm0q/courses/computer-science-pg-10</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/shiv-nadar-university-5tfrf4ciagkxgu2uwkh7jcm0q/courses/design-ug-1</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/shiv-nadar-university-5tfrf4ciagkxgu2uwkh7jcm0q/courses/economics-finance-ug-4</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/shiv-nadar-university-5tfrf4ciagkxgu2uwkh7jcm0q/courses/economics-ug-3</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/shiv-nadar-university-5tfrf4ciagkxgu2uwkh7jcm0q/courses/engineering-pg-9</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/shiv-nadar-university-5tfrf4ciagkxgu2uwkh7jcm0q/courses/engineering-technology-ug-0</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/shiv-nadar-university-5tfrf4ciagkxgu2uwkh7jcm0q/courses/humanities-ug-5</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/shiv-nadar-university-5tfrf4ciagkxgu2uwkh7jcm0q/courses/international-dual-degree-ug-8</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/shiv-nadar-university-5tfrf4ciagkxgu2uwkh7jcm0q/courses/international-relations-ug-6</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/shiv-nadar-university-5tfrf4ciagkxgu2uwkh7jcm0q/courses/management-pg-12</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/shiv-nadar-university-5tfrf4ciagkxgu2uwkh7jcm0q/courses/management-ug-2</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aaocollege.com/colleges/shiv-nadar-university-5tfrf4ciagkxgu2uwkh7jcm0q/courses/sciences-ug-7</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://aaocollege.com/colleges/shri-ramswaroop-memorial-university-srmu-85d8lqmm9cew5irgjqlq75xr3</loc>
     <lastmod>2026-01-25</lastmod>
     <changefreq>weekly</changefreq>
@@ -3218,67 +3650,67 @@
   </url>
   <url>
     <loc>https://aaocollege.com/contact</loc>
-    <lastmod>2026-02-18</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://aaocollege.com/emi-calculator</loc>
-    <lastmod>2026-02-18</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://aaocollege.com/get-pg</loc>
-    <lastmod>2026-02-18</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://aaocollege.com/mentorship</loc>
-    <lastmod>2026-02-18</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://aaocollege.com/register-pg</loc>
-    <lastmod>2026-02-18</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://aaocollege.com/services</loc>
-    <lastmod>2026-02-18</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://aaocollege.com/services/admission-consulting</loc>
-    <lastmod>2026-02-18</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://aaocollege.com/services/college-search</loc>
-    <lastmod>2026-02-18</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://aaocollege.com/services/course-counseling</loc>
-    <lastmod>2026-02-18</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://aaocollege.com/services/entrance-exam-prep</loc>
-    <lastmod>2026-02-18</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://aaocollege.com/services/scholarship-guidance</loc>
-    <lastmod>2026-02-18</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
