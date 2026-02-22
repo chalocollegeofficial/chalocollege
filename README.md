@@ -17,7 +17,7 @@ A comprehensive platform for students to find colleges, get admission guidance, 
 - **Colleges:** Detailed listings with fees, courses, and placements.
 - **Counseling:** Direct lead forms for expert guidance.
 - **Accommodation:** A dedicated section for finding PGs and Hostels.
-- **Success Stories:** Real examples of students placed in top institutions.
+- **Success Stories:** Real examples of students placed in top institutions
 
 ## 🛠 Tech Stack
 - **Frontend:** React 18, Vite, React Router 6
