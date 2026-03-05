@@ -1,0 +1,3 @@
+pg_name,location,room_type,rent_range,facilities,contact_number,images,video_url,status
+"Sunrise PG","Noida Sector 62","Single/Double","₹7k - 11k / month","WiFi|Food|Laundry|AC","9876543210","https://cdn.example.com/pg/sunrise1.jpg|https://cdn.example.com/pg/sunrise2.jpg","https://youtu.be/pg-tour","approved"
+"Green Nest Residency","Bengaluru Electronic City","Triple Sharing","₹5.5k - 8k / month","WiFi|Housekeeping|Study Room","9876501234","https://cdn.example.com/pg/green1.jpg|https://cdn.example.com/pg/green2.jpg","","approved"
